@@ -36,6 +36,22 @@
   }
 }
 
+/* Custom shadows */
+.drop-shadow-glow-green {
+  filter: drop-shadow(0 0 8px rgba(37, 255, 190, 0.3));
+}
+
+.drop-shadow-glow-red {
+  filter: drop-shadow(0 0 8px rgba(255, 86, 86, 0.3));
+}
+
+/* Glass morphism effects */
+.glass-effect {
+  backdrop-filter: blur(12px);
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
 /* Modern scrollbar styles */
 ::-webkit-scrollbar {
   width: 4px;
@@ -53,13 +69,4 @@
 
 ::-webkit-scrollbar-thumb:hover {
   background: hsl(0 0% 70%);
-}
-
-/* Smooth transitions */
-* {
-  transition: background-color 0.15s ease-in-out,
-              border-color 0.15s ease-in-out,
-              color 0.15s ease-in-out,
-              transform 0.15s ease-in-out,
-              opacity 0.15s ease-in-out;
 }

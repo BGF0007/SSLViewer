@@ -10,6 +10,12 @@ export interface Certificate {
   pemEncoded?: string | null;
   sans?: string[];
   signatureAlgorithm?: string;
+  bits?: number;
+  ext_key_usage?: string[];
+  fingerprint?: string;
+  fingerprint256?: string;
+  fingerprint512?: string;
+  subjectaltname?: string;
 }
 
 export interface CertificateError {

@@ -17,6 +17,7 @@ export interface Certificate {
   fingerprint?: string;
   fingerprint256?: string;
   fingerprint512?: string;
+  version?: string | number; 
   sans?: string[];
   subjectaltname?: string;
   infoAccess?: {
