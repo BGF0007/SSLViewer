@@ -25,10 +25,14 @@ const App = () => {
     setLoading(true);
     setError(null);
     setCertificates([]);
-    setValidationIssues([]);
+    setValidationIssues([]); // Changed this line
     
     try {
-      const response = await fetch('/api/certificates', {
+      const apiUrl = process.env.NODE_ENV === 'production' 
+        ? '/api/certificates'
+        : 'http://localhost:3000/api/certificates';
+
+      const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -39,6 +43,10 @@ const App = () => {
           port: port || 443
         })
       });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
 
       const result = await response.json();
 
@@ -52,6 +60,7 @@ const App = () => {
         setError(errorMessage || 'Failed to validate certificate');
       }
     } catch (err) {
+      console.error('Error:', err);
       setError(err instanceof Error ? err.message : 'An error occurred while fetching certificate');
     } finally {
       setLoading(false);

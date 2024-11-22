@@ -5,9 +5,9 @@
   "type": "module",
   "scripts": {
     "dev:frontend": "vite",
-    "dev:backend": "node server/index.js",
-    "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\"",
-    "dev:api": "vercel dev",
+    "dev:express": "tsx watch server.ts",
+    "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:express\"",
+    "dev:vercel": "vercel dev",
     "build": "tsc && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
@@ -47,6 +47,7 @@
     "postcss": "^8.4.35",
     "tailwindcss": "^3.4.1",
     "typescript": "^5.2.2",
+    "tsx": "^3.10.13",
     "vite": "^5.1.6"
   }
 }
