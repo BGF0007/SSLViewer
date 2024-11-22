@@ -2,6 +2,8 @@
 
 A modern, user-friendly SSL certificate analysis tool built with React and TypeScript. SSLViewer allows you to quickly inspect and validate SSL certificates for any domain.
 
+The entire front-end codebase was written by [Claude 3.5 Sonnet](https://www.anthropic.com/claude) using [Windsurf IDE](https://www.codeium.com/windsurf), a revolutionary AI-powered development environment.
+
 ![alt text](image.png)
 ## Features
 
@@ -69,6 +71,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [React](https://reactjs.org/) for the UI framework
 - [Tailwind CSS](https://tailwindcss.com/) for styling
 - [Framer Motion](https://www.framer.com/motion/) for animations
+- [Claude 3.5 Sonnet](https://www.anthropic.com/claude) for generating the entire front-end codebase
+- [Windsurf IDE](https://www.codeium.com/windsurf) for the AI-powered development environment
+- [Vercel](https://vercel.com) for hosting and deployment
 
 ## Contact
 
