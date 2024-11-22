@@ -67,11 +67,9 @@ const App = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#0B0D13] to-[#0C1A28] text-gray-100 relative flex flex-col">
+    <div className="min-h-screen bg-gradient-to-b from-[#0C0B0B] to-[#0C0C0C] text-gray-100 relative flex flex-col">
       {/* Fixed position background elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-[40%] -left-[20%] w-[800px] h-[800px] bg-blue-500/5 rounded-full blur-3xl"></div>
-        <div className="absolute top-[60%] -right-[20%] w-[800px] h-[800px] bg-emerald-500/5 rounded-full blur-3xl"></div>
       </div>
 
       {/* Scrollable content container */}
