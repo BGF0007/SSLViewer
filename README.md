@@ -50,7 +50,7 @@ npm run dev
 yarn dev
 ```
 
-4. Open [http://localhost:5173](http://localhost:5173) in your browser
+4. Open [http://localhost:5173](http://localhost:5173) in your browser or visit the offical website at [https://www.sslviewer.com](https://www.sslviewer.com)
 
 ## Usage
 
