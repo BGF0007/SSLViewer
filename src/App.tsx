@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import CertificateForm from './components/CertificateForm';
 import CertificateChain from './components/CertificateChain';
 import About from './components/About';
+import { Analytics } from "@vercel/analytics/react"
 import SSLChecks from './components/SSLChecks';
 import { Certificate, ValidationIssue } from './types';
 
@@ -71,7 +72,7 @@ const App = () => {
       {/* Fixed position background elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
       </div>
-
+      <Analytics/>
       {/* Scrollable content container */}
       <div className="relative flex-1 overflow-y-auto">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12 w-full flex flex-col min-h-screen">
