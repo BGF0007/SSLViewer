@@ -1,15 +1,17 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  ChevronRight, 
-  Eye, 
+import {
   CheckCircle2, 
   XCircle,
   AlertCircle,
-  Clock,
-  ChevronDown
+  ChevronDown,
+  Copy,
+  Download,
 } from 'lucide-react';
 import { Certificate } from '../types';
+import SyntaxHighlighter from 'react-syntax-highlighter';
+import { atomOneDark } from 'react-syntax-highlighter/dist/esm/styles/hljs';
+import '../styles/scrollbar.css';
 import { RawCertificateData } from './RawCertificateData';
 
 interface ValidationIssue {
@@ -22,25 +24,60 @@ interface CertificateChainProps {
   validationIssues?: ValidationIssue[];
 }
 
-const statusIcons = {
-  valid: <CheckCircle2 className="w-4 h-4 text-emerald-400" />,
-  warning: <AlertCircle className="w-4 h-4 text-amber-400" />,
-  error: <XCircle className="w-4 h-4 text-rose-500" />,
-  expired: <Clock className="w-4 h-4 text-gray-500" />
-};
-
 const CertificateChain = ({ certificates, validationIssues = [] }: CertificateChainProps) => {
-  const [expandedCerts, setExpandedCerts] = useState<Set<string>>(new Set());
+  const [expandedCerts, setExpandedCerts] = useState<string[]>([]);
   const [selectedCert, setSelectedCert] = useState<Certificate | null>(null);
+  const [hoveredCert, setHoveredCert] = useState<string | null>(null);
+  const [activeTabs, setActiveTabs] = useState<{ [key: string]: 'details' | 'pem' }>({});
+  const [copySuccess, setCopySuccess] = useState<{ [key: string]: boolean }>({});
+
+  // Debug log certificates
+  console.log('Certificates received:', certificates.map(cert => ({
+    serialNumber: cert.serialNumber,
+    allProperties: Object.keys(cert)
+  })));
 
   const toggleCertificate = (serialNumber: string) => {
-    const newExpanded = new Set(expandedCerts);
-    if (newExpanded.has(serialNumber)) {
-      newExpanded.delete(serialNumber);
+    const newExpanded = [...expandedCerts];
+    if (newExpanded.includes(serialNumber)) {
+      newExpanded.splice(newExpanded.indexOf(serialNumber), 1);
     } else {
-      newExpanded.add(serialNumber);
+      newExpanded.push(serialNumber);
     }
     setExpandedCerts(newExpanded);
+  };
+
+  const handleCopy = async (text: string, section: string) => {
+    if (!text) return;
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopySuccess(prev => ({ ...prev, [section]: true }));
+      setTimeout(() => setCopySuccess(prev => ({ ...prev, [section]: false })), 2000);
+    } catch (error) {
+      console.error('Failed to copy data:', error);
+    }
+  };
+
+  const handleDownload = (certificate: Certificate, type: 'details' | 'pem') => {
+    const data = type === 'pem' ? certificate.pemEncoded : certificate.raw;
+    if (!data) return;
+
+    try {
+      const blob = new Blob([data], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      const fileName = typeof certificate.subject === 'object' && certificate.subject.CN 
+        ? certificate.subject.CN 
+        : 'certificate';
+      a.download = `${fileName}_${type}.${type === 'pem' ? 'pem' : 'txt'}`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Failed to download certificate data:', error);
+    }
   };
 
   const getCertificateStatus = (cert: Certificate) => {
@@ -60,8 +97,222 @@ const CertificateChain = ({ certificates, validationIssues = [] }: CertificateCh
     return `${days} days left`;
   };
 
+  const parseDN = (dn: string) => {
+    if (typeof dn !== 'string') return {};
+    const components: Record<string, string> = {};
+    const parts = dn.split(',').map(part => part.trim());
+    
+    parts.forEach(part => {
+      const [key, ...values] = part.split('=');
+      if (key && values.length > 0) {
+        components[key.trim()] = values.join('=').trim();
+      }
+    });
+    
+    return components;
+  };
+
+  const renderCertificateDetails = (cert: Certificate) => {
+    const activeTab = activeTabs[cert.serialNumber] || 'details';
+    const subjectComponents = typeof cert.subject === 'string' ? parseDN(cert.subject) : cert.subject || {};
+    const issuerComponents = typeof cert.issuer === 'string' ? parseDN(cert.issuer) : cert.issuer || {};
+
+    const formatDate = (dateStr: string) => {
+      try {
+        // Handle GMT format
+        if (dateStr.includes('GMT')) {
+          return dateStr;
+        }
+        // Handle ISO format
+        const date = new Date(dateStr);
+        if (isNaN(date.getTime())) {
+          return dateStr;
+        }
+        return date.toLocaleString();
+      } catch {
+        return dateStr;
+      }
+    };
+
+    return (
+      <motion.div
+        initial={{ opacity: 0, height: 0 }}
+        animate={{ opacity: 1, height: 'auto' }}
+        exit={{ opacity: 0, height: 0 }}
+        transition={{ duration: 0.2 }}
+        className="overflow-hidden"
+      >
+        <div className="mt-4 p-4 bg-white/[0.02] rounded-xl border border-neutral-800">
+          {/* Tab Navigation */}
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex space-x-2">
+              <button
+                onClick={() => setActiveTabs(prev => ({ ...prev, [cert.serialNumber]: 'details' }))}
+                className={`px-3 py-1.5 text-sm rounded-lg transition-colors ${
+                  activeTab === 'details'
+                    ? 'bg-neutral-800 text-neutral-200'
+                    : 'text-neutral-400 hover:text-neutral-300 hover:bg-white/[0.02]'
+                }`}
+              >
+                Details
+              </button>
+              <button
+                onClick={() => setActiveTabs(prev => ({ ...prev, [cert.serialNumber]: 'pem' }))}
+                className={`px-3 py-1.5 text-sm rounded-lg transition-colors ${
+                  activeTab === 'pem'
+                    ? 'bg-neutral-800 text-neutral-200'
+                    : 'text-neutral-400 hover:text-neutral-300 hover:bg-white/[0.02]'
+                }`}
+              >
+                PEM
+              </button>
+            </div>
+            <div className="flex items-center space-x-2">
+              <motion.button
+                onClick={() => handleCopy(activeTab === 'pem' ? cert.pemEncoded || '' : cert.raw || '', cert.serialNumber)}
+                className="p-1.5 text-neutral-400 hover:text-neutral-300 bg-white/[0.02] hover:bg-neutral-800
+                  rounded-lg border border-neutral-700 hover:border-neutral-600
+                  focus:outline-none focus:ring-1 focus:ring-neutral-700
+                  transition-all duration-200"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                {copySuccess[cert.serialNumber] ? (
+                  <CheckCircle2 className="w-4 h-4" />
+                ) : (
+                  <Copy className="w-4 h-4" />
+                )}
+              </motion.button>
+              <motion.button
+                onClick={() => handleDownload(cert, activeTab)}
+                className="p-1.5 text-neutral-400 hover:text-neutral-300 bg-white/[0.02] hover:bg-neutral-800
+                  rounded-lg border border-neutral-700 hover:border-neutral-600
+                  focus:outline-none focus:ring-1 focus:ring-neutral-700
+                  transition-all duration-200"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <Download className="w-4 h-4" />
+              </motion.button>
+            </div>
+          </div>
+
+          {/* Certificate Content */}
+          <div className="relative">
+            {activeTab === 'details' ? (
+              <div className="space-y-6">
+                {/* Basic Info */}
+                <div>
+                  <h4 className="text-xs font-medium text-neutral-400 mb-3">Basic Information</h4>
+                  <div className="grid gap-2">
+                    <div className="p-2 rounded-lg bg-white/[0.02] border border-neutral-700">
+                      <div className="text-xs text-neutral-500 mb-1">Serial Number</div>
+                      <div className="text-sm text-neutral-300 break-all font-mono">{cert.serialNumber}</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Subject Information */}
+                <div>
+                  <h4 className="text-xs font-medium text-neutral-400 mb-3">Subject</h4>
+                  <div className="grid gap-2">
+                    {Object.entries(subjectComponents).map(([key, value]) => (
+                      <div key={key} className="p-2 rounded-lg bg-white/[0.02] border border-neutral-700">
+                        <div className="text-xs text-neutral-500 mb-1">{key}</div>
+                        <div className="text-sm text-neutral-300 break-all font-mono">{value}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Issuer Information */}
+                <div>
+                  <h4 className="text-xs font-medium text-neutral-400 mb-3">Issuer</h4>
+                  <div className="grid gap-2">
+                    {Object.entries(issuerComponents).map(([key, value]) => (
+                      <div key={key} className="p-2 rounded-lg bg-white/[0.02] border border-neutral-700">
+                        <div className="text-xs text-neutral-500 mb-1">{key}</div>
+                        <div className="text-sm text-neutral-300 break-all font-mono">{value}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Validity Period */}
+                <div>
+                  <h4 className="text-xs font-medium text-neutral-400 mb-3">Validity Period</h4>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="p-2 rounded-lg bg-white/[0.02] border border-neutral-700">
+                      <div className="text-xs text-neutral-500 mb-1">Valid From</div>
+                      <div className="text-sm text-neutral-300 font-mono">
+                        {formatDate(cert.validFrom)}
+                      </div>
+                    </div>
+                    <div className="p-2 rounded-lg bg-white/[0.02] border border-neutral-700">
+                      <div className="text-xs text-neutral-500 mb-1">Valid To</div>
+                      <div className="text-sm text-neutral-300 font-mono">
+                        {formatDate(cert.validTo)}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Certificate Details */}
+                <div>
+                  <h4 className="text-xs font-medium text-neutral-400 mb-3">Certificate Details</h4>
+                  <div className="space-y-2">
+                    {cert.bits && (
+                      <div className="p-2 rounded-lg bg-white/[0.02] border border-neutral-700">
+                        <div className="text-xs text-neutral-500 mb-1">Key Size</div>
+                        <div className="text-sm text-neutral-300 font-mono">{cert.bits} bits</div>
+                      </div>
+                    )}
+                    {cert.fingerprint && (
+                      <div className="p-2 rounded-lg bg-white/[0.02] border border-neutral-700">
+                        <div className="text-xs text-neutral-500 mb-1">Fingerprint (SHA-1)</div>
+                        <div className="text-sm text-neutral-300 break-all font-mono">{cert.fingerprint}</div>
+                      </div>
+                    )}
+                    {cert.fingerprint256 && (
+                      <div className="p-2 rounded-lg bg-white/[0.02] border border-neutral-700">
+                        <div className="text-xs text-neutral-500 mb-1">Fingerprint (SHA-256)</div>
+                        <div className="text-sm text-neutral-300 break-all font-mono">{cert.fingerprint256}</div>
+                      </div>
+                    )}
+                    {cert.fingerprint512 && (
+                      <div className="p-2 rounded-lg bg-white/[0.02] border border-neutral-700">
+                        <div className="text-xs text-neutral-500 mb-1">Fingerprint (SHA-512)</div>
+                        <div className="text-sm text-neutral-300 break-all font-mono">{cert.fingerprint512}</div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="relative overflow-auto max-h-[500px] custom-scrollbar">
+                <SyntaxHighlighter
+                  language="plaintext"
+                  style={atomOneDark}
+                  customStyle={{
+                    background: 'transparent',
+                    padding: '1rem',
+                    margin: 0,
+                    fontSize: '0.875rem',
+                  }}
+                >
+                  {cert.pemEncoded || 'No PEM data available'}
+                </SyntaxHighlighter>
+              </div>
+            )}
+          </div>
+        </div>
+      </motion.div>
+    );
+  };
+
   return (
     <div className="space-y-6">
+      {/* Header with validation status */}
       <div className="flex items-center justify-between px-1">
         <h2 className="text-sm font-medium text-gray-400 uppercase tracking-wider">
           Certificate Chain
@@ -72,65 +323,80 @@ const CertificateChain = ({ certificates, validationIssues = [] }: CertificateCh
             Valid Chain
           </div>
         ) : (
-          <div className="flex items-center text-xs text-rose-400 bg-rose-400/5 px-3.5 py-2 rounded-xl">
+          <button
+            onClick={() => setExpandedCerts(certificates.map(c => c.serialNumber))}
+            className="flex items-center text-xs text-rose-400 bg-rose-400/5 px-3.5 py-2 rounded-xl hover:bg-rose-400/10 transition-colors"
+          >
             <XCircle className="w-3.5 h-3.5 mr-2" />
-            {validationIssues.length} {validationIssues.length === 1 ? 'issue' : 'issues'}
-          </div>
+            {validationIssues.length} {validationIssues.length === 1 ? 'issue' : 'issues'} - Click to expand all
+          </button>
         )}
       </div>
 
-      <div className="w-full">
-        {certificates.map((cert, index) => {
-          const isExpanded = expandedCerts.has(cert.serialNumber);
-          const status = getCertificateStatus(cert);
-          const isFirst = index === 0;
-          const isLast = index === certificates.length - 1;
+      {/* Validation issues summary */}
+      {validationIssues.length > 0 && (
+        <div className="px-6 py-4 bg-rose-400/5 border border-rose-400/20 rounded-xl space-y-2">
+          {validationIssues.map((issue, index) => (
+            <div key={index} className="flex items-start space-x-3">
+              {issue.type === 'error' ? (
+                <XCircle className="w-4 h-4 text-rose-400 mt-0.5 flex-shrink-0" />
+              ) : (
+                <AlertCircle className="w-4 h-4 text-amber-400 mt-0.5 flex-shrink-0" />
+              )}
+              <span className="text-sm text-gray-300">{issue.message}</span>
+            </div>
+          ))}
+        </div>
+      )}
 
-          return (
-            <motion.div
-              key={cert.serialNumber}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="relative w-full"
-            >
-              <div className="relative w-full">
-                <button
-                  onClick={() => toggleCertificate(cert.serialNumber)}
-                  className={`w-full text-left px-6 py-5 rounded-xl 
-                    ${isFirst ? 'bg-gradient-to-br from-emerald-400/5 via-emerald-400/3 to-transparent' : 
-                      isLast ? 'bg-gradient-to-br from-blue-400/5 via-blue-400/3 to-transparent' : 
-                      'bg-gradient-to-br from-white/[0.03] via-white/[0.02] to-transparent'} 
-                    hover:bg-white/[0.04] border border-white/5 hover:border-white/10 
-                    transition-all duration-200 group shadow-lg shadow-black/5`}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4 min-w-0">
-                      <div className={`flex-shrink-0 p-2 rounded-lg 
-                        ${isFirst ? 'bg-emerald-400/10 ring-1 ring-emerald-400/20' : 
-                          isLast ? 'bg-blue-400/10 ring-1 ring-blue-400/20' : 
-                          'bg-white/5 ring-1 ring-white/10'}`}
-                      >
-                        {statusIcons[status.status as keyof typeof statusIcons]}
-                      </div>
+      {/* Certificate chain */}
+      <div className="w-full space-y-3">
+        <AnimatePresence mode="sync">
+          {certificates.map((cert, index) => {
+            const isFirst = index === 0;
+            const isLast = index === certificates.length - 1;
+            const isExpanded = expandedCerts.includes(cert.serialNumber);
+            const isHovered = hoveredCert === cert.serialNumber;
+            const status = getCertificateStatus(cert);
+
+            return (
+              <motion.div
+                key={cert.serialNumber}
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2, delay: index * 0.1 }}
+                className="w-full"
+              >
+                <div className="relative w-full">
+                  <button
+                    onClick={() => toggleCertificate(cert.serialNumber)}
+                    onMouseEnter={() => setHoveredCert(cert.serialNumber)}
+                    onMouseLeave={() => setHoveredCert(null)}
+                    className={`w-full text-left p-4 rounded-lg
+                      bg-white/[0.02] hover:bg-white/[0.04]
+                      border border-white/5 hover:border-white/10
+                      transition-all duration-200
+                      ${isHovered ? 'scale-[1.01]' : 'scale-100'}`}
+                  >
+                    <div className="flex items-center justify-between gap-4">
                       <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-3 flex-wrap">
-                          <h3 className="text-sm font-medium text-gray-200 truncate">
+                        <div className="flex items-center gap-3">
+                          <h3 className="text-sm font-medium text-gray-200">
                             {typeof cert.subject === 'string' 
                               ? cert.subject.split(',').find(part => part.trim().startsWith('CN='))?.split('=')[1] || 'Unknown CN'
                               : cert.subject.CN || 'Unknown CN'}
                           </h3>
-                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                            ${isFirst ? 'bg-emerald-400/10 text-emerald-400 ring-1 ring-emerald-400/20' : 
-                              isLast ? 'bg-blue-400/10 text-blue-400 ring-1 ring-blue-400/20' : 
-                              'bg-white/5 text-gray-400 ring-1 ring-white/10'}`}
+                          <span className={`text-xs font-medium
+                            ${isFirst ? 'text-emerald-400' : 
+                              isLast ? 'text-blue-400' : 
+                              'text-orange-400'}`}
                           >
                             {isFirst ? 'Leaf' : isLast ? 'Root' : 'Intermediate'}
                           </span>
                         </div>
-                        <div className="mt-1.5 flex items-center space-x-3 text-xs">
-                          <span className="text-gray-500">
+                        <div className="mt-1 flex items-center gap-3 text-xs text-gray-500">
+                          <span>
                             {(() => {
                               const issuer = typeof cert.issuer === 'string'
                                 ? cert.issuer.split(',').reduce((acc, part) => {
@@ -142,146 +408,79 @@ const CertificateChain = ({ certificates, validationIssues = [] }: CertificateCh
                               return issuer.O || issuer.CN || 'Unknown Issuer';
                             })()}
                           </span>
-                          <span className="text-gray-600">•</span>
-                          <span className={`${
-                            status.status === 'expired' ? 'text-rose-400' :
-                            status.status === 'warning' ? 'text-amber-400' :
-                            'text-emerald-400'
-                          }`}>
+                          <span className="inline-block w-1 h-1 rounded-full bg-gray-600" />
+                          <span className={`
+                            ${status.status === 'expired' ? 'text-rose-400' :
+                              status.status === 'warning' ? 'text-amber-400' :
+                              'text-emerald-400'}`}
+                          >
                             {getDaysRemainingText(status.days)}
                           </span>
                         </div>
                       </div>
-                    </div>
-                    <div className="flex items-center pl-4 space-x-3 flex-shrink-0">
-                      <div
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedCert(cert);
-                        }}
-                        className="p-2 rounded-lg hover:bg-white/5 transition-colors cursor-pointer"
-                      >
-                        <Eye className="w-4 h-4 text-gray-400 hover:text-gray-300" />
+                      <div className="flex items-center gap-3">
+                        <div className={`w-2 h-2 rounded-full flex-shrink-0
+                          ${status.status === 'expired' ? 'bg-rose-400' :
+                            status.status === 'warning' ? 'bg-amber-400' :
+                            'bg-emerald-400'}`}
+                        />
+                        <motion.div
+                          animate={{ rotate: isExpanded ? 180 : 0 }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          <ChevronDown className={`w-4 h-4 ${isHovered ? 'text-gray-300' : 'text-gray-500'}`} />
+                        </motion.div>
                       </div>
-                      <motion.div
-                        animate={{ rotate: isExpanded ? 90 : 0 }}
-                        transition={{ duration: 0.2 }}
-                        className="w-8"
-                      >
-                        <ChevronRight className="w-4 h-4 text-gray-500" />
-                      </motion.div>
                     </div>
-                  </div>
-                </button>
+                  </button>
 
-                <AnimatePresence>
-                  {isExpanded && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: 'auto' }}
-                      exit={{ opacity: 0, height: 0 }}
-                      transition={{ duration: 0.2 }}
-                      className="overflow-hidden"
-                    >
-                      <div className="px-6 py-4 mt-2 rounded-xl bg-white/[0.01] border border-white/5">
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <h4 className="text-xs font-medium text-gray-400 mb-2">Subject</h4>
-                            <div className="space-y-1">
-                              {(() => {
-                                // Parse the DN string into components
-                                const parseDN = (dn: string) => {
-                                  const components: Record<string, string> = {};
-                                  const parts = dn.split(',').map(part => part.trim());
-                                  
-                                  parts.forEach(part => {
-                                    const [key, ...values] = part.split('=');
-                                    if (key && values.length > 0) {
-                                      components[key.trim()] = values.join('=').trim();
-                                    }
-                                  });
-                                  
-                                  return components;
-                                };
-
-                                const subjectComponents = typeof cert.subject === 'string' 
-                                  ? parseDN(cert.subject)
-                                  : cert.subject;
-
-                                return Object.entries(subjectComponents).map(([key, value]) => {
-                                  if (!value || value === '') return null;
-                                  return (
-                                    <div key={key} className="flex items-start space-x-2">
-                                      <span className="text-xs text-gray-500 min-w-[2rem]">{key}</span>
-                                      <span className="text-xs text-gray-300 break-all">{value}</span>
-                                    </div>
-                                  );
-                                });
-                              })()}
-                            </div>
-                          </div>
-                          <div>
-                            <h4 className="text-xs font-medium text-gray-400 mb-2">Validity</h4>
-                            <div className="space-y-2">
-                              <div>
-                                <div className="text-xs text-gray-500">Valid From</div>
-                                <div className="text-xs text-gray-300">
-                                  {new Date(cert.validFrom).toLocaleDateString()}
-                                </div>
-                              </div>
-                              <div>
-                                <div className="text-xs text-gray-500">Valid To</div>
-                                <div className="text-xs text-gray-300">
-                                  {new Date(cert.validTo).toLocaleDateString()}
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-              {index < certificates.length - 1 && (
-                <div className="flex items-center justify-center h-8">
-                  <motion.div
-                    initial={{ scale: 0, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    transition={{ 
-                      type: "spring",
-                      stiffness: 260,
-                      damping: 20
-                    }}
-                  >
-                    <motion.div
-                      animate={{ 
-                        y: [0, 2, 0]
-                      }}
-                      transition={{
-                        duration: 1.5,
-                        repeat: Infinity,
-                        ease: "easeInOut"
-                      }}
-                    >
-                      <ChevronDown className="w-6 h-6 text-gray-400" />
-                    </motion.div>
-                  </motion.div>
+                  <AnimatePresence>
+                    {isExpanded && (
+                      renderCertificateDetails(cert)
+                    )}
+                  </AnimatePresence>
                 </div>
-              )}
-            </motion.div>
-          );
-        })}
+
+                {index < certificates.length - 1 && (
+                  <div className="flex items-center justify-center h-12">
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ 
+                        type: "spring",
+                        stiffness: 260,
+                        damping: 20
+                      }}
+                    >
+                      <motion.div
+                        animate={{ 
+                          y: [0, 4, 0]
+                        }}
+                        transition={{
+                          duration: 2,
+                          repeat: Infinity,
+                          ease: "easeInOut"
+                        }}
+                        className="bg-white/[0.02] p-2 rounded-full border border-white/5"
+                      >
+                        <ChevronDown className="w-4 h-4 text-gray-400" />
+                      </motion.div>
+                    </motion.div>
+                  </div>
+                )}
+              </motion.div>
+            );
+          })}
+        </AnimatePresence>
       </div>
 
-      <AnimatePresence>
-        {selectedCert && (
-          <RawCertificateData
-            certificate={selectedCert}
-            onClose={() => setSelectedCert(null)}
-          />
-        )}
-      </AnimatePresence>
+      {/* Raw certificate data modal */}
+      {selectedCert && (
+        <RawCertificateData
+          certificate={selectedCert}
+          onClose={() => setSelectedCert(null)}
+        />
+      )}
     </div>
   );
 };

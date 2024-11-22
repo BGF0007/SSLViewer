@@ -1,6 +1,6 @@
 import express from 'express';
 import cors from 'cors';
-import { handler as certificatesHandler } from './api/certificates';
+import certificatesHandler from './api/certificates';
 import { Request, Response } from 'express';
 
 const app = express();

@@ -1,32 +1,29 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Shield, ShieldAlert, ExternalLink, Info, HelpCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import CertificateForm from './components/CertificateForm';
 import CertificateChain from './components/CertificateChain';
-import TermsOfService from './components/TermsOfService';
-import PrivacyPolicy from './components/PrivacyPolicy';
+import About from './components/About';
 import { Certificate, ValidationIssue } from './types';
 
 const App = () => {
+  useEffect(() => {
+    document.documentElement.classList.add('dark');
+  }, []);
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [certificates, setCertificates] = useState<Certificate[]>([]);
   const [validationIssues, setValidationIssues] = useState<ValidationIssue[]>([]);
   const [showHelp, setShowHelp] = useState(false);
-  const [showTerms, setShowTerms] = useState(false);
-  const [showPrivacy, setShowPrivacy] = useState(false);
-
-  // Force dark mode
-  if (typeof document !== 'undefined') {
-    document.documentElement.classList.add('dark');
-  }
+  const [showAbout, setShowAbout] = useState(false);
 
   const handleSubmit = async (hostname: string, port?: number) => {
     setLoading(true);
     setError(null);
     setCertificates([]);
-    setValidationIssues([]); // Changed this line
-    
+    setValidationIssues([]); 
+
     try {
       const apiUrl = process.env.NODE_ENV === 'production' 
         ? '/api/certificates'
@@ -68,39 +65,51 @@ const App = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#0A0A0A] via-[#111111] to-[#0A0A0A] text-gray-100">
-      <div className="max-w-5xl mx-auto px-6 py-12">
+    <div className="min-h-screen bg-[#0F1014] text-gray-100">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         <motion.div 
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="mb-12 backdrop-blur-xl"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.6 }}
+          className="mb-12"
         >
           <div className="flex items-center justify-between flex-col sm:flex-row gap-6">
-            <div className="flex items-center space-x-4">
-              <div className="bg-gradient-to-br from-emerald-400/20 to-emerald-400/10 p-3 rounded-2xl border border-emerald-400/20 shadow-lg shadow-emerald-500/5">
-                {error ? (
-                  <ShieldAlert className="h-7 w-7 text-rose-400" />
-                ) : (
-                  <Shield className="h-7 w-7 text-emerald-400" />
-                )}
+            <div className="flex items-center space-x-5">
+              <div className="relative">
+                <div className="absolute inset-0 bg-[#FFFFFF]/20 blur-xl"></div>
+                <div >
+                  {error ? (
+                    <ShieldAlert className="h-8 w-8 text-rose-400" />
+                  ) : (
+                    <Shield className="h-8 w-8 text-[#28F8BA]" />
+                  )}
+                </div>
               </div>
               <div>
-                <div className="flex items-center gap-3 mb-1">
-                  <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-gray-100 to-gray-300">
-                    SSL Certificate Checker
+                <div className="flex items-center gap-3 mb-2">
+                  <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-gray-50 to-gray-300">
+                    SSL Viewer
                   </h1>
-                  <span className="px-2 py-0.5 text-[11px] font-medium bg-blue-500/10 text-blue-400 rounded-full border border-blue-500/20 shadow-sm shadow-blue-500/10">
+                  <span className="px-2.5 py-1 text-xs font-semibold bg-[#57A3FF]/10 text-[#57A3FF] rounded-full border border-[#57A3FF]/20">
                     BETA
                   </span>
                 </div>
-                <div className="flex items-center gap-3 flex-wrap">
-                  <p className="text-sm text-gray-400">
-                    Validate and inspect SSL certificates for any domain
+                <div className="flex items-center gap-4 flex-wrap">
+                  <p className="text-sm text-gray-400 font-medium">
+                    Validate and inspect SSL certificates instantly
                   </p>
-                  <span className="text-xs text-gray-500">
-                    by <a href="https://github.com/bgf0007" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-gray-300 transition-colors hover:underline">@bgf0007</a>
-                  </span>
+                  <div className="flex items-center gap-2 text-xs text-gray-500">
+                    <span>by</span>
+                    <a 
+                      href="https://github.com/bgf0007" 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="flex items-center gap-1.5 text-gray-400 hover:text-gray-200 transition-colors hover:underline"
+                    >
+                      @bgf0007
+                      <ExternalLink className="h-3 w-3" />
+                    </a>
+                  </div>
                 </div>
               </div>
             </div>
@@ -112,7 +121,7 @@ const App = () => {
                 rel="noopener noreferrer"
                 className="flex items-center space-x-2 px-4 py-2 text-sm text-gray-300 rounded-xl 
                   bg-white/[0.03] hover:bg-white/[0.08] border border-white/5 
-                  hover:border-white/10 transition-all duration-300 hover:shadow-lg hover:shadow-white/5"
+                  hover:border-white/10 transition-all duration-300"
               >
                 <span>SSL Labs</span>
                 <ExternalLink className="w-4 h-4" />
@@ -121,7 +130,7 @@ const App = () => {
                 onClick={() => setShowHelp(prev => !prev)}
                 className="p-2.5 text-gray-400 hover:text-gray-300 rounded-xl 
                   bg-white/[0.03] hover:bg-white/[0.08] border border-white/5 
-                  hover:border-white/10 transition-all duration-300 hover:shadow-lg hover:shadow-white/5"
+                  hover:border-white/10 transition-all duration-300"
                 title="Help & Information"
               >
                 <HelpCircle className="w-5 h-5" />
@@ -139,7 +148,7 @@ const App = () => {
               transition={{ duration: 0.2 }}
               className="overflow-hidden"
             >
-              <div className="mb-8 p-6 rounded-xl bg-gradient-to-br from-white/[0.03] to-white/[0.01] border border-white/5 shadow-xl shadow-black/20">
+              <div className="mb-8 p-6 rounded-xl bg-gradient-to-br from-[#FFFFFF]/[0.03] to-[#8DC0FF]/[0.01] border border-white/5 shadow-xl shadow-black/20">
                 <div className="flex items-start space-x-4">
                   <Info className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
                   <div className="space-y-4">
@@ -247,19 +256,13 @@ const App = () => {
 
         <footer className="mt-16 pt-8 border-t border-white/5">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-gray-500">
-            <p> 2024 SSL Certificate Checker</p>
+            <p> 2024 SSL Viewer</p>
             <div className="flex items-center space-x-6">
               <button 
-                onClick={() => setShowPrivacy(true)}
+                onClick={() => setShowAbout(true)}
                 className="hover:text-gray-300 transition-colors"
               >
-                Privacy Policy
-              </button>
-              <button 
-                onClick={() => setShowTerms(true)}
-                className="hover:text-gray-300 transition-colors"
-              >
-                Terms of Service
+                About
               </button>
               <a href="https://github.com/bgf0007" target="_blank" rel="noopener noreferrer" className="hover:text-gray-300 transition-colors">GitHub</a>
             </div>
@@ -267,8 +270,7 @@ const App = () => {
         </footer>
 
         <AnimatePresence>
-          {showTerms && <TermsOfService onClose={() => setShowTerms(false)} />}
-          {showPrivacy && <PrivacyPolicy onClose={() => setShowPrivacy(false)} />}
+          {showAbout && <About onClose={() => setShowAbout(false)} />}
         </AnimatePresence>
       </div>
     </div>

@@ -4,25 +4,25 @@
 
 @layer base {
   :root {
-    --background: 0 0% 5%;
-    --foreground: 0 0% 90%;
-    --card: 0 0% 7%;
-    --card-foreground: 0 0% 90%;
-    --popover: 0 0% 5%;
-    --popover-foreground: 0 0% 95%;
-    --primary: 0 0% 80%;
-    --primary-foreground: 0 0% 7%;
-    --secondary: 0 0% 12%;
-    --secondary-foreground: 0 0% 95%;
-    --muted: 0 0% 12%;
-    --muted-foreground: 0 0% 60%;
-    --accent: 0 0% 80%;
-    --accent-foreground: 0 0% 95%;
-    --destructive: 0 75% 60%;
-    --destructive-foreground: 0 0% 95%;
-    --border: 0 0% 12%;
-    --input: 0 0% 12%;
-    --ring: 0 0% 50%;
+    --background: 240 14% 15%;
+    --foreground: 220 10% 98%;
+    --card: 220 16% 25%;
+    --card-foreground: 220 10% 98%;
+    --popover: 220 16% 22%;
+    --popover-foreground: 220 10% 98%;
+    --primary: 220 10% 98%;
+    --primary-foreground: 220 16% 22%;
+    --secondary: 220 16% 30%;
+    --secondary-foreground: 220 10% 98%;
+    --muted: 220 16% 30%;
+    --muted-foreground: 220 10% 75%;
+    --accent: 220 16% 30%;
+    --accent-foreground: 220 10% 98%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 220 16% 30%;
+    --input: 220 16% 30%;
+    --ring: 220 16% 55%;
     --radius: 0.25rem;
   }
 }
@@ -47,12 +47,12 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: hsl(0 0% 20%);
+  background: hsl(0 0% 80%);
   border-radius: 2px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: hsl(0 0% 25%);
+  background: hsl(0 0% 70%);
 }
 
 /* Smooth transitions */
@@ -62,39 +62,4 @@
               color 0.15s ease-in-out,
               transform 0.15s ease-in-out,
               opacity 0.15s ease-in-out;
-}
-
-/* Certificate chain connection lines */
-.cert-chain-line {
-  @apply absolute left-6 top-12 bottom-0 w-px bg-white/5;
-}
-
-/* Certificate status colors */
-.status-valid {
-  @apply text-emerald-400;
-}
-
-.status-warning {
-  @apply text-amber-400;
-}
-
-.status-error {
-  @apply text-rose-500;
-}
-
-/* Toast styles */
-.sonner-toast {
-  @apply bg-black/90 border-0 shadow-xl shadow-black/20;
-}
-
-.sonner-toast[data-type="success"] {
-  @apply bg-emerald-500/5 text-emerald-400;
-}
-
-.sonner-toast[data-type="error"] {
-  @apply bg-rose-500/5 text-rose-400;
-}
-
-.sonner-toast[data-type="warning"] {
-  @apply bg-amber-500/5 text-amber-400;
 }

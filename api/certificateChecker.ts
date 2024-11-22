@@ -36,6 +36,7 @@ export async function checkCertificate(hostname: string, port: number = 443): Pr
           return reject(new Error('No certificate data received'));
         }
 
+        logCertificateData(cert);
         console.log('Certificate received, parsing chain');
         const chain = parseChain(cert);
         socket.end();
@@ -83,6 +84,9 @@ function parseChain(cert: any): Certificate[] {
       continue;
     }
 
+    console.log('Processing certificate in chain:');
+    logCertificateData(current);
+
     const certInfo: Certificate = {
       type: determineCertType(current),
       subject: formatDN(current.subject),
@@ -90,9 +94,20 @@ function parseChain(cert: any): Certificate[] {
       serialNumber: current.serialNumber,
       validFrom: current.valid_from,
       validTo: current.valid_to,
-      signatureAlgorithm: current.sigalg,
+      bits: current.bits,
+      ext_key_usage: current.ext_key_usage,
+      fingerprint: current.fingerprint,
+      fingerprint256: current.fingerprint256,
+      fingerprint512: current.fingerprint512,
+      subjectaltname: current.subjectaltname,
       ...(current.subjectaltname && determineCertType(current) === 'leaf' ? {
         sans: current.subjectaltname.split(', ').map((san: string) => san.replace('DNS:', ''))
+      } : {}),
+      ...(current.infoAccess ? {
+        infoAccess: {
+          'CA Issuers - URI': current.infoAccess['CA Issuers - URI'],
+          'OCSP - URI': current.infoAccess['OCSP - URI']
+        }
       } : {}),
       status: determineCertStatus(current.valid_from, current.valid_to),
       raw: current.raw?.toString('base64') || null,
@@ -111,6 +126,48 @@ function parseChain(cert: any): Certificate[] {
   }
 
   return chain;
+}
+
+function logCertificateData(cert: any) {
+  const getRelevantProps = (obj: any) => {
+    const {
+      subject,
+      issuer,
+      valid_from,
+      valid_to,
+      serialNumber,
+      signatureAlgorithm,
+      sigalg,
+      sig_alg,
+      fingerprint,
+      fingerprint256,
+      fingerprint384,
+      fingerprint512,
+      subjectaltname,
+      infoAccess,
+      ...rest
+    } = obj;
+    
+    return {
+      subject,
+      issuer,
+      valid_from,
+      valid_to,
+      serialNumber,
+      signatureAlgorithm,
+      sigalg,
+      sig_alg,
+      fingerprint,
+      fingerprint256,
+      fingerprint384,
+      fingerprint512,
+      subjectaltname,
+      infoAccess,
+      availableProps: Object.keys(obj)
+    };
+  };
+
+  console.log('Certificate properties:', getRelevantProps(cert));
 }
 
 function determineCertType(cert: any): Certificate['type'] {
@@ -139,4 +196,3 @@ function determineCertStatus(validFrom: string, validTo: string): Certificate['s
   if (now > to) return 'expired';
   return 'valid';
 }
-

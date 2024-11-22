@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Loader2, Globe, Hash, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { Loader2, Globe, AlertCircle, CheckCircle2, ArrowRight } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface CertificateFormProps {
   onSubmit: (hostname: string, port?: number) => void;
@@ -41,13 +42,12 @@ const CertificateForm: React.FC<CertificateFormProps> = ({ onSubmit, loading }) 
 
   const isValidHostname = (host: string) => {
     if (!host) return false;
-    // Match server-side validation
     const hostnameRegex = /^[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?)*\.[a-zA-Z]{2,}$/;
     return hostnameRegex.test(host);
   };
 
   const isValidPort = (p: string) => {
-    if (!p) return true; // Empty port is valid (will use default)
+    if (!p) return true;
     const portNum = parseInt(p, 10);
     return !isNaN(portNum) && portNum >= 1 && portNum <= 65535;
   };
@@ -86,112 +86,130 @@ const CertificateForm: React.FC<CertificateFormProps> = ({ onSubmit, loading }) 
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
-        <div className="flex-1 space-y-2">
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <label className="text-sm text-gray-400 pl-1">Domain Name</label>
+    <form onSubmit={handleSubmit} className="relative">
+      <div className="flex flex-col sm:flex-row gap-4">
+        <div className="flex-1">
+          <div className="relative group">
+            <input
+              type="text"
+              value={hostname}
+              onChange={handleHostnameChange}
+              onKeyDown={handleKeyDown}
+              onBlur={() => setTouched({ ...touched, hostname: true })}
+              placeholder="Enter domain name (e.g., example.com)"
+              className={`
+                w-full pl-10 pr-24 py-3 bg-white/[0.03] rounded-2xl
+                border ${hostnameError ? 'border-rose-500/20' : 'border-white/5'}
+                text-gray-100 placeholder-gray-600
+                focus:outline-none focus:ring-1 
+                ${hostnameError 
+                  ? 'focus:ring-rose-500/10 focus:border-rose-500/20' 
+                  : 'focus:ring-white/10 focus:border-white/10'}
+                hover:bg-white/[0.04]
+                transition-all duration-200
+              `}
+            />
+            <Globe className="h-4 w-4 text-gray-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+            
+            <AnimatePresence mode="wait">
               {hostnameError && (
-                <p className="text-xs text-rose-400 flex items-center gap-1">
-                  <AlertCircle className="h-3 w-3" />
-                  {hostnameError}
-                </p>
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 10 }}
+                  transition={{ duration: 0.2 }}
+                  className="absolute top-full left-0 mt-2"
+                >
+                  <div className="px-3 py-1.5 bg-rose-500/10 text-rose-400/90 text-xs rounded-lg flex items-center gap-1.5 border border-rose-500/10">
+                    <AlertCircle className="h-3 w-3 flex-shrink-0" />
+                    {hostnameError}
+                  </div>
+                </motion.div>
               )}
-            </div>
-            <div className="flex gap-3">
-              <div className="relative group flex-1">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Globe className="h-4 w-4 text-gray-500 group-focus-within:text-gray-400 transition-colors" />
-                </div>
-                <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                  {getInputIcon('hostname')}
-                </div>
-                <input
-                  type="text"
-                  value={hostname}
-                  onChange={handleHostnameChange}
-                  onBlur={() => setTouched(t => ({ ...t, hostname: true }))}
-                  onKeyDown={handleKeyDown}
-                  placeholder="example.com"
-                  spellCheck={false}
-                  required
-                  aria-label="Domain name"
-                  className={`w-full h-11 pl-10 pr-10 bg-white/[0.03] text-gray-100 
-                    placeholder-gray-600 rounded-xl border ${hostnameError ? 'border-rose-500/50' : 'border-white/5'}
-                    focus:outline-none focus:ring-1 ${hostnameError ? 'focus:ring-rose-500/50' : 'focus:ring-white/10'}
-                    hover:border-white/10 transition-all duration-150
-                    group-hover:bg-white/[0.04]`}
-                />
-                <div className={`absolute -bottom-4 left-0 right-0 h-0.5 scale-x-0 bg-white/10
-                  group-focus-within:scale-x-100 transition-transform duration-300 origin-left
-                  ${hostnameError ? '!bg-rose-500/20' : ''}`} />
-              </div>
+            </AnimatePresence>
 
-              <button
+            <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key="port-input"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 20 }}
+                  className="relative mr-2"
+                >
+                  <input
+                    type="text"
+                    value={port}
+                    onChange={handlePortChange}
+                    onKeyDown={handleKeyDown}
+                    onBlur={() => setTouched({ ...touched, port: true })}
+                    placeholder="443"
+                    className={`
+                      w-16 px-2 py-1.5 bg-white/[0.04] rounded-lg text-sm
+                      border ${portError ? 'border-rose-500/20' : 'border-white/5'}
+                      text-gray-300 placeholder-gray-600 text-center
+                      focus:outline-none focus:ring-1 
+                      ${portError 
+                        ? 'focus:ring-rose-500/10 focus:border-rose-500/20' 
+                        : 'focus:ring-white/10 focus:border-white/10'}
+                      hover:bg-white/[0.06]
+                      transition-all duration-200
+                    `}
+                  />
+                  {portError && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 10 }}
+                      className="absolute top-full right-0 mt-2 whitespace-nowrap"
+                    >
+                      <div className="px-3 py-1.5 bg-rose-500/10 text-rose-400/90 text-xs rounded-lg flex items-center gap-1.5 border border-rose-500/10">
+                        <AlertCircle className="h-3 w-3 flex-shrink-0" />
+                        {portError}
+                      </div>
+                    </motion.div>
+                  )}
+                </motion.div>
+              </AnimatePresence>
+
+              <motion.button
                 type="submit"
                 disabled={loading || !hostname || !validState.hostname || !validState.port}
-                className="h-11 px-5 bg-white/[0.03] hover:bg-white/[0.06] 
-                  disabled:opacity-50 disabled:hover:bg-white/[0.03] disabled:cursor-not-allowed
-                  text-sm font-medium text-gray-300 rounded-xl border border-white/5
-                  hover:border-white/10 focus:outline-none focus:ring-1 focus:ring-white/10
-                  transition-all duration-200 ease-out flex items-center justify-center gap-2
-                  disabled:text-gray-500 shrink-0 min-w-[120px] active:scale-[0.98]"
+                className={`
+                  p-2.5 rounded-xl
+                  flex items-center justify-center
+                  transition-all duration-300
+                  ${loading || !hostname || !validState.hostname || !validState.port
+                    ? 'bg-white/[0.02] text-gray-600 cursor-not-allowed'
+                    : 'bg-[#28F8BA]/10 text-[#28F8BA] hover:bg-[#28F8BA]/20 hover:scale-105 border border-[#28F8BA]/20'}
+                `}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
-                {loading ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    <span>Checking</span>
-                  </>
-                ) : (
-                  <>
-                    <Globe className="w-4 h-4" />
-                    <span>Check</span>
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <div className="w-full sm:w-48 space-y-2">
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <label className="text-sm text-gray-400 pl-1">Port <span className="text-gray-600">(optional)</span></label>
-              {portError && (
-                <p className="text-xs text-rose-400 flex items-center gap-1">
-                  <AlertCircle className="h-3 w-3" />
-                  {portError}
-                </p>
-              )}
-            </div>
-            <div className="relative group">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Hash className="h-4 w-4 text-gray-500 group-focus-within:text-gray-400 transition-colors" />
-              </div>
-              <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                {getInputIcon('port')}
-              </div>
-              <input
-                type="number"
-                value={port}
-                onChange={handlePortChange}
-                onBlur={() => setTouched(t => ({ ...t, port: true }))}
-                onKeyDown={handleKeyDown}
-                placeholder="443"
-                min="1"
-                max="65535"
-                aria-label="Port number"
-                className={`w-full h-11 pl-10 pr-10 bg-white/[0.03] text-gray-100 
-                  placeholder-gray-600 rounded-xl border ${portError ? 'border-rose-500/50' : 'border-white/5'}
-                  focus:outline-none focus:ring-1 ${portError ? 'focus:ring-rose-500/50' : 'focus:ring-white/10'}
-                  hover:border-white/10 transition-all duration-150
-                  group-hover:bg-white/[0.04]
-                  [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none`}
-              />
-              <div className={`absolute -bottom-4 left-0 right-0 h-0.5 scale-x-0 bg-white/10
-                group-focus-within:scale-x-100 transition-transform duration-300 origin-left
-                ${portError ? '!bg-rose-500/20' : ''}`} />
+                <AnimatePresence mode="wait">
+                  {loading ? (
+                    <motion.div
+                      key="loading"
+                      initial={{ opacity: 0, rotate: 0 }}
+                      animate={{ opacity: 1, rotate: 360 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <Loader2 className="h-5 w-5 animate-spin" />
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      key="arrow"
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: 10 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <ArrowRight className="h-5 w-5" />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.button>
             </div>
           </div>
         </div>

@@ -12,8 +12,17 @@ export interface Certificate {
   validFrom: string;
   validTo: string;
   serialNumber: string;
-  signatureAlgorithm?: string;
+  bits?: number;
+  ext_key_usage?: string[];
+  fingerprint?: string;
+  fingerprint256?: string;
+  fingerprint512?: string;
   sans?: string[];
+  subjectaltname?: string;
+  infoAccess?: {
+    'CA Issuers - URI'?: string[];
+    'OCSP - URI'?: string[];
+  };
   status: string;
   raw: string;
   pemEncoded: string;
