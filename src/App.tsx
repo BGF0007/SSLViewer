@@ -130,7 +130,7 @@ const App = () => {
           >
             <div className="max-w-2xl mx-auto">
               <div className="mb-6 text-center">
-                <h2 className="text-xl font-semibold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-blue-100 to-emerald-100">
+                <h2 className="text-xl font-semibold mb-2 text-[#FFFFFFE1]">
                   Check SSL Certificate
                 </h2>
                 <p className="text-sm text-gray-400">
