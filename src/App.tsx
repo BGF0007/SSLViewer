@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Shield, ShieldAlert } from 'lucide-react';
+import { Shield, ShieldAlert, AlertCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import CertificateForm from './components/CertificateForm';
 import CertificateChain from './components/CertificateChain';
@@ -68,52 +68,74 @@ const App = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#0C0B0B] to-[#0C0C0C] text-gray-100 relative flex flex-col">
-      {/* Fixed position background elements */}
+    <div className="min-h-screen bg-gradient-to-b from-[#0C0B0B] via-[#121212] to-[#0C0C0C] text-gray-100 relative flex flex-col">
+      {/* Animated background elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute inset-0 bg-gradient-to-tr from-blue-500/5 via-transparent to-emerald-500/5 animate-gradient-shift"></div>
+        <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-[0.02] bg-repeat"></div>
       </div>
       <Analytics/>
-      {/* Scrollable content container */}
+      {/* Main content */}
       <div className="relative flex-1 overflow-y-auto">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12 w-full flex flex-col min-h-screen">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-12 sm:py-16 w-full flex flex-col min-h-screen">
           <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.4 }}
-            className="mb-12"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="mb-16"
           >
-            <div className="flex items-center justify-between flex-col sm:flex-row gap-6">
-              <div className="flex items-center space-x-5">
-                <div className="relative">
+            <div className="flex items-center justify-between flex-col sm:flex-row gap-8">
+              <div className="flex items-center space-x-6">
+                <motion.div 
+                  whileHover={{ scale: 1.05 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                  className="relative group"
+                >
                   <div className="relative">
                     {error ? (
-                      <ShieldAlert className="h-10 w-10 text-rose-400 drop-shadow-glow-red" />
+                      <ShieldAlert className="h-12 w-12 text-rose-400 drop-shadow-glow-red transition-transform duration-200 group-hover:scale-110" />
                     ) : (
-                      <Shield className="h-10 w-10 text-[#25FFBE] drop-shadow-glow-green" />
+                      <Shield className="h-12 w-12 text-[#25FFBE] drop-shadow-glow-green transition-transform duration-200 group-hover:scale-110" />
                     )}
-                    <div className="absolute inset-0 animate-pulse-slow opacity-50 blur-sm">
+                    <div className="absolute inset-0 animate-pulse-slow opacity-50 blur-md">
                       {error ? (
-                        <ShieldAlert className="h-10 w-10 text-rose-400" />
+                        <ShieldAlert className="h-12 w-12 text-rose-400" />
                       ) : (
-                        <Shield className="h-10 w-10 text-[#25FFBE]" />
+                        <Shield className="h-12 w-12 text-[#25FFBE]" />
                       )}
                     </div>
                   </div>
-                </div>
+                </motion.div>
                 <div>
-                  <div className="flex items-center gap-3 mb-2">
-                    <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-gray-50 via-blue-100 to-gray-300 tracking-tight">
+                  <div className="flex items-center gap-4 mb-3">
+                    <motion.h1 
+                      className="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-gray-50 via-blue-100 to-emerald-200 tracking-tight"
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.6, delay: 0.2 }}
+                    >
                       SSL Viewer
-                    </h1>
-                    <span className="px-2.5 py-1 text-xs font-semibold bg-[#57A3FF]/10 text-[#57A3FF] rounded-full border border-[#57A3FF]/20 backdrop-blur-sm">
+                    </motion.h1>
+                    <motion.span 
+                      whileHover={{ scale: 1.05 }}
+                      className="px-3 py-1 text-xs font-semibold bg-[#57A3FF]/10 text-[#57A3FF] rounded-full border border-[#57A3FF]/20 backdrop-blur-sm shadow-lg"
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.3, delay: 0.4 }}
+                    >
                       BETA
-                    </span>
+                    </motion.span>
                   </div>
-                  <div className="flex items-center gap-4 flex-wrap">
-                    <p className="text-sm text-gray-400 font-medium">
+                  <motion.div 
+                    className="flex items-center gap-4 flex-wrap"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4, delay: 0.3 }}
+                  >
+                    <p className="text-base text-gray-300 font-medium">
                       Validate and inspect SSL certificates instantly
                     </p>
-                  </div>
+                  </motion.div>
                 </div>
               </div>
             </div>
@@ -124,106 +146,55 @@ const App = () => {
           </AnimatePresence>
 
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.4 }}
-            className="w-full backdrop-blur-md bg-white/[0.02] rounded-xl border border-white/10 p-8 shadow-2xl"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="w-full rounded-3xl border border-white/10 bg-black/40 backdrop-blur-xl p-8 sm:p-14 shadow-2xl"
           >
             <div className="max-w-2xl mx-auto">
-              <div className="mb-6 text-center">
-                <h2 className="text-xl font-semibold mb-2 text-[#FFFFFFE1]">
+              <motion.div 
+                className="mb-8 text-center"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: 0.4 }}
+              >
+                <h2 className="text-2xl font-semibold mb-3 text-transparent bg-clip-text bg-gradient-to-r from-gray-50 to-gray-300">
                   Check SSL Certificate
                 </h2>
                 <p className="text-sm text-gray-400">
                   Enter a domain name to inspect its SSL certificates and security status
                 </p>
-              </div>
+              </motion.div>
               
-              <div className="bg-black/10 rounded-xl border border-white/10 p-6">
+              <div className="bg-black/20 rounded-2xl border border-white/10 p-6 sm:p-8 backdrop-blur-xl shadow-inner">
                 <CertificateForm onSubmit={handleSubmit} loading={loading} />
-                
-                <div className="mt-4 flex flex-wrap gap-4 justify-center text-xs text-gray-400">
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
-                    <span>Certificate Validation</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-blue-500"></div>
-                    <span>Chain Analysis</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-amber-500"></div>
-                    <span>Security Checks</span>
-                  </div>
-                </div>
               </div>
             </div>
           </motion.div>
 
+          {/* Results Section */}
           <AnimatePresence mode="wait">
-            {loading && (
+            {(certificates.length > 0 || error) && (
               <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="mt-8 text-center"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.5 }}
+                className="mt-8"
               >
-                <div className="inline-block p-3 bg-white/[0.02] rounded-lg backdrop-blur-sm border border-white/10">
-                  <div className="animate-spin w-6 h-6 border-2 border-blue-400 border-t-transparent rounded-full"></div>
-                </div>
-                <p className="mt-4 text-gray-400">Analyzing SSL certificates...</p>
-              </motion.div>
-            )}
-
-            {error && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="mt-8 p-4 bg-rose-500/10 border border-rose-500/20 rounded-lg backdrop-blur-sm"
-              >
-                <p className="text-rose-300">{error}</p>
-              </motion.div>
-            )}
-
-            {certificates.length > 0 && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="mt-8 space-y-6"
-              >
-                <div className="flex items-center justify-between mb-6">
-                  <div className="text-sm text-gray-400">
-                    Results for <span className="text-white font-medium">{searchedDomain}</span>
+                {error ? (
+                  <div className="p-6 rounded-2xl bg-rose-500/10 border border-rose-500/20 backdrop-blur-sm">
+                    <div className="flex items-center gap-3 text-rose-400">
+                      <AlertCircle className="w-5 h-5" />
+                      <p>{error}</p>
+                    </div>
                   </div>
-                  <button
-                    onClick={() => {
-                      setCertificates([]);
-                      setValidationIssues([]);
-                      setError(null);
-                      setSearchedDomain('');
-                    }}
-                    className="inline-flex items-center gap-2 px-4 py-2 text-sm text-gray-300 rounded-xl 
-                      bg-white/[0.03] hover:bg-white/[0.08] border border-white/5 
-                      hover:border-white/10 transition-colors duration-200"
-                  >
-                    <Shield className="w-4 h-4" />
-                    Check another domain
-                  </button>
-                </div>
-
-                <div className="space-y-6">
-                  <SSLChecks 
-                    certificates={certificates}
-                    validationIssues={validationIssues} 
-                  />
-                  <CertificateChain 
-                    certificates={certificates} 
-                    domain={searchedDomain}
-                    validationIssues={validationIssues}
-                  />
-                </div>
+                ) : (
+                  <div className="space-y-8">
+                    <SSLChecks certificates={certificates} validationIssues={validationIssues} />
+                    <CertificateChain certificates={certificates} domain={searchedDomain} />
+                  </div>
+                )}
               </motion.div>
             )}
           </AnimatePresence>

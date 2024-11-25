@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Globe, AlertCircle, CheckCircle2, ArrowRight } from 'lucide-react';
+import { Globe, AlertCircle, ArrowRight } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
 import '../styles/transitions.css';
 
 interface CertificateFormProps {
@@ -77,100 +78,126 @@ const CertificateForm: React.FC<CertificateFormProps> = ({ onSubmit, loading }) 
     ? 'Port must be between 1 and 65535'
     : '';
 
-  const getInputIcon = (field: 'hostname' | 'port') => {
-    if (!touched[field] || isTyping) return null;
-    if (field === 'hostname' && !hostname) return null;
-    if (field === 'port' && !port) return null;
-
-    return validState[field] ? (
-      <CheckCircle2 className="h-4 w-4 text-emerald-500/70" />
-    ) : (
-      <AlertCircle className="h-4 w-4 text-rose-500/70" />
-    );
-  };
-
   return (
     <form onSubmit={handleSubmit} className="relative">
       <div className="max-w-xl mx-auto space-y-4">
-        {/* Error messages */}
-        {(hostnameError || portError) && (
-          <div>
-            {hostnameError && (
-              <div className="fade-enter fade-enter-active">
-                <div className="px-3 py-1.5 bg-rose-500/10 text-rose-400/90 text-xs rounded-lg flex items-center gap-1.5 border border-rose-500/10">
-                  <AlertCircle className="w-3.5 h-3.5" />
+        <AnimatePresence>
+          {(hostnameError || portError) && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2 }}
+              className="space-y-2"
+            >
+              {hostnameError && (
+                <div className="px-4 py-2.5 bg-rose-500/10 text-rose-400/90 text-sm rounded-xl flex items-center gap-2.5 border border-rose-500/10 backdrop-blur-sm">
+                  <AlertCircle className="w-4 h-4" />
                   {hostnameError}
                 </div>
-              </div>
-            )}
-            {portError && (
-              <div className="fade-enter fade-enter-active mt-2">
-                <div className="px-3 py-1.5 bg-rose-500/10 text-rose-400/90 text-xs rounded-lg flex items-center gap-1.5 border border-rose-500/10">
-                  <AlertCircle className="w-3.5 h-3.5" />
+              )}
+              {portError && (
+                <div className="px-4 py-2.5 bg-rose-500/10 text-rose-400/90 text-sm rounded-xl flex items-center gap-2.5 border border-rose-500/10 backdrop-blur-sm">
+                  <AlertCircle className="w-4 h-4" />
                   {portError}
                 </div>
-              </div>
-            )}
-          </div>
-        )}
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-        <div className="relative">
-          <Globe className="h-4 w-4 text-gray-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
-          <input
-            type="text"
-            value={hostname}
-            onChange={handleHostnameChange}
-            onKeyDown={handleKeyDown}
-            onBlur={() => setTouched({ ...touched, hostname: true })}
-            placeholder="Enter domain name"
-            className={`
-              w-full pl-10 pr-24 py-3 bg-white/[0.03] rounded-2xl
-              border border-white/5 text-gray-300 placeholder-gray-600
-              focus:outline-none focus:ring-1 
-              ${hostnameError 
-                ? 'focus:ring-rose-500/10 focus:border-rose-500/20' 
-                : 'focus:ring-white/10 focus:border-white/10'}
-              hover:bg-white/[0.04]
-            `}
-          />
-          <div className="absolute right-0 top-0 h-full flex items-center">
-            <div className="flex items-center mr-3 space-x-2">
-              <span className="text-gray-500 text-sm">:</span>
+        <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex-1 relative group">
+            <div className="relative">
+              <Globe className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 transition-colors duration-200 group-hover:text-gray-300" />
               <input
                 type="text"
-                value={port}
-                onChange={handlePortChange}
+                value={hostname}
+                onChange={handleHostnameChange}
+                onBlur={() => setTouched({ ...touched, hostname: true })}
                 onKeyDown={handleKeyDown}
-                onBlur={() => setTouched({ ...touched, port: true })}
-                placeholder="443"
-                className={`
-                  w-14 py-1 px-1 bg-transparent
-                  border-b border-white/10 text-gray-300 placeholder-gray-600 text-center
-                  focus:outline-none
-                  ${portError 
-                    ? 'border-rose-500/20' 
-                    : 'focus:border-white/20'}
-                `}
+                placeholder="Enter domain name (e.g., example.com)"
+                className={`w-full pl-12 pr-4 py-3.5 bg-white/[0.03] border ${
+                  touched.hostname && !validState.hostname
+                    ? 'border-rose-500/50 focus:border-rose-500'
+                    : touched.hostname && validState.hostname
+                    ? 'border-emerald-500/50 focus:border-emerald-500'
+                    : 'border-white/10 focus:border-white/20'
+                } rounded-xl outline-none transition-all duration-200 placeholder-gray-500 text-gray-200 backdrop-blur-sm
+                focus:ring-2 ${
+                  touched.hostname && !validState.hostname
+                    ? 'focus:ring-rose-500/10'
+                    : touched.hostname && validState.hostname
+                    ? 'focus:ring-emerald-500/10'
+                    : 'focus:ring-white/5'
+                }`}
               />
             </div>
           </div>
+
+          <div className="w-full sm:w-32">
+            <input
+              type="text"
+              value={port}
+              onChange={handlePortChange}
+              onBlur={() => setTouched({ ...touched, port: true })}
+              onKeyDown={handleKeyDown}
+              placeholder="Port"
+              className={`w-full px-4 py-3.5 bg-white/[0.03] border ${
+                touched.port && !validState.port
+                  ? 'border-rose-500/50 focus:border-rose-500'
+                  : touched.port && validState.port && port
+                  ? 'border-emerald-500/50 focus:border-emerald-500'
+                  : 'border-white/10 focus:border-white/20'
+              } rounded-xl outline-none transition-all duration-200 placeholder-gray-500 text-gray-200 backdrop-blur-sm
+              focus:ring-2 ${
+                touched.port && !validState.port
+                  ? 'focus:ring-rose-500/10'
+                  : touched.port && validState.port && port
+                  ? 'focus:ring-emerald-500/10'
+                  : 'focus:ring-white/5'
+              }`}
+            />
+          </div>
         </div>
 
-        <button
+        <motion.button
+          whileHover={{ scale: 1.01 }}
+          whileTap={{ scale: 0.99 }}
           type="submit"
           disabled={loading || !hostname || !validState.hostname || !validState.port}
-          className={`
-            w-full flex items-center justify-center gap-2 px-4 py-3 
-            rounded-2xl text-sm font-medium
-            ${loading || !hostname || !validState.hostname || !validState.port
-              ? 'bg-white/[0.02] text-gray-600 cursor-not-allowed'
-              : 'bg-[#28F8BA]/10 text-[#28F8BA] hover:bg-[#28F8BA]/20 border border-[#28F8BA]/20'}
-            transition-colors duration-200
-          `}
+          className={`group w-full mt-4 px-6 py-3.5 flex items-center justify-center gap-3 rounded-xl font-medium transition-all duration-200 ${
+            loading || !hostname || !validState.hostname || !validState.port
+              ? 'bg-gray-400/10 text-gray-500 cursor-not-allowed'
+              : 'bg-white/[0.03] hover:bg-white/[0.06] text-gray-100 border border-white/10 hover:border-white/20 backdrop-blur-sm'
+          }`}
         >
-          <span>Check Certificate</span>
-          <ArrowRight className="w-4 h-4" />
-        </button>
+          {loading ? (
+            <div className="w-5 h-5 border-2 border-gray-400 border-t-white rounded-full animate-spin" />
+          ) : (
+            <>
+              <span>Check Certificate</span>
+              <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-white transition-colors duration-200" />
+            </>
+          )}
+        </motion.button>
+
+        <div className="mt-6 flex flex-wrap gap-4 justify-center text-xs text-gray-400">
+          <motion.div 
+            whileHover={{ scale: 1.05 }}
+            className="flex items-center gap-2 bg-white/[0.03] px-3 py-2 rounded-full border border-white/5"
+          >
+            <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-lg shadow-emerald-500/20"></div>
+            <span>Certificate Validation</span>
+          </motion.div>
+          <motion.div 
+            whileHover={{ scale: 1.05 }}
+            className="flex items-center gap-2 bg-white/[0.03] px-3 py-2 rounded-full border border-white/5"
+          >
+            <div className="w-2 h-2 rounded-full bg-blue-500 shadow-lg shadow-blue-500/20"></div>
+            <span>Chain Verification</span>
+          </motion.div>
+        </div>
       </div>
     </form>
   );

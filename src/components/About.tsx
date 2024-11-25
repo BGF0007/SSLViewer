@@ -1,4 +1,4 @@
-import { X, Server, Shield, Code2, Terminal } from 'lucide-react';
+import { X, Server, Shield, Code2, Terminal, Link, CheckCircle2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 interface AboutProps {
   onClose: () => void;
@@ -42,6 +42,7 @@ const About = ({ onClose }: AboutProps) => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
+      transition={{ duration: 0.2 }}
       className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
       onClick={onClose}
     >
@@ -50,171 +51,124 @@ const About = ({ onClose }: AboutProps) => {
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
         transition={{ duration: 0.2 }}
-        className="relative w-full max-w-2xl max-h-[85vh] overflow-auto bg-[#16181E] rounded-xl border border-neutral-800 shadow-xl"
+        className="relative max-w-2xl w-full bg-[#0C0B0B]/90 border border-white/10 rounded-2xl backdrop-blur-xl shadow-2xl overflow-hidden"
         onClick={e => e.stopPropagation()}
       >
-        {/* Header */}
-        <div className="sticky top-0 z-10 flex items-center justify-between p-6 bg-[#16181E] border-b border-neutral-800">
-          <div className="flex items-center gap-3">
-            <Shield className="w-6 h-6 text-emerald-400/80" />
-            <h2 className="text-xl font-semibold text-neutral-200">About SSL Viewer</h2>
-          </div>
-          <button
-            onClick={onClose}
-            className="p-2 text-neutral-400 hover:text-neutral-300 rounded-lg hover:bg-white/[0.02]"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
+        <div className="relative p-6 sm:p-8">
+          <div className="absolute inset-0 bg-gradient-to-tr from-blue-500/5 via-transparent to-emerald-500/5"></div>
+          
+          <div className="relative">
+            <div className="flex items-center justify-between mb-6">
+              <motion.h2 
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="text-2xl font-semibold text-transparent bg-clip-text bg-gradient-to-r from-gray-50 to-gray-300"
+              >
+                About SSL Viewer
+              </motion.h2>
+              <motion.button
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={onClose}
+                className="p-1 rounded-lg hover:bg-white/5 transition-colors"
+              >
+                <X className="w-5 h-5 text-gray-400" />
+              </motion.button>
+            </div>
 
-        {/* Content */}
-        <div className="p-6 space-y-8">
-          <Section
-            icon={Shield}
-            title="Overview"
-            content={
-              <p>
-                SSL Viewer is a modern tool designed to help you inspect and validate SSL certificates.
-                It provides detailed insights into certificate chains, validity periods, and security features
-                with a clean, user-friendly interface.
-              </p>
-            }
-          />
-
-          <Section
-            icon={Server}
-            title="Certificate Validation Process"
-            content={
-              <>
-                <p className="mb-4">
-                  The application performs SSL/TLS certificate validation through these key steps:
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="space-y-6"
+            >
+              <div className="space-y-4">
+                <p className="text-gray-300">
+                  SSL Viewer is a powerful tool designed to help you inspect and validate SSL certificates for any domain.
+                  Our tool provides detailed insights into certificate chains, validation status, and potential security issues.
                 </p>
-                <div className="space-y-2 mb-4">
-                  <div className="p-2 rounded-lg bg-white/[0.02] border border-neutral-800">
-                    <span className="text-emerald-400/80">1. Certificate Chain Retrieval</span>
-                    <p className="text-sm mt-1">Connects to the server on the specified port (default 443) and retrieves the complete certificate chain.</p>
-                  </div>
-                  <div className="p-2 rounded-lg bg-white/[0.02] border border-neutral-800">
-                    <span className="text-emerald-400/80">2. Chain Validation</span>
-                    <p className="text-sm mt-1">Verifies the certificate chain length and presence of root and intermediate certificates.</p>
-                  </div>
-                  <div className="p-2 rounded-lg bg-white/[0.02] border border-neutral-800">
-                    <span className="text-emerald-400/80">3. Certificate Analysis</span>
-                    <p className="text-sm mt-1">Examines validity period, domain match, and key usage extensions.</p>
-                  </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 }}
+                    className="p-4 rounded-xl bg-white/[0.03] border border-white/10 backdrop-blur-sm"
+                  >
+                    <div className="flex items-center gap-3 mb-2">
+                      <Shield className="w-5 h-5 text-emerald-400" />
+                      <h3 className="font-medium text-gray-200">Certificate Validation</h3>
+                    </div>
+                    <p className="text-sm text-gray-400">
+                      Comprehensive validation of SSL certificates including expiration, trust chain, and security features.
+                    </p>
+                  </motion.div>
+
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3 }}
+                    className="p-4 rounded-xl bg-white/[0.03] border border-white/10 backdrop-blur-sm"
+                  >
+                    <div className="flex items-center gap-3 mb-2">
+                      <Link className="w-5 h-5 text-blue-400" />
+                      <h3 className="font-medium text-gray-200">Chain Analysis</h3>
+                    </div>
+                    <p className="text-sm text-gray-400">
+                      Detailed analysis of the complete certificate chain from leaf to root certificates.
+                    </p>
+                  </motion.div>
                 </div>
-                <CodeBlock code={`// Certificate chain validation checks
-const validateCertificateChain = (certificates: Certificate[]) => {
-  const checks = [
-    {
-      name: 'Certificate Chain',
-      passed: certificates.length > 0,
-      description: 'Valid certificate chain found',
-      details: certificates.length > 0 
-        ? \`Complete chain with \${certificates.length} certificates\`
-        : 'No certificate chain found',
-      subChecks: [
-        {
-          name: 'Root Certificate',
-          passed: certificates.length >= 2,
-          message: certificates.length >= 2 ? 'Present' : 'Missing'
-        },
-        {
-          name: 'Intermediate Certificates',
-          passed: certificates.length >= 2,
-          message: \`\${certificates.length - 2} intermediate(s)\`
-        }
-      ]
-    }
-  ];
-  
-  // Validate expiry dates
-  const expiryStatus = getExpiryStatus(certificates[0]);
-  const days = getRemainingDays(certificates[0].validTo);
-  
-  if (days < 0) return 'Certificate has expired';
-  if (days <= 30) return \`Warning: Expires in \${days} days\`;
-  return \`Valid for \${days} days\`;
-};`} />
-              </>
-            }
-          />
 
-          <Section
-            icon={Terminal}
-            title="Certificate Information Processing"
-            content={
-              <>
-                <p className="mb-4">
-                  The application extracts and processes certificate information in the following ways:
-                </p>
-                <CodeBlock code={`// Certificate information extraction
-const processCertificateInfo = (cert: Certificate) => {
-  // Extract and format subject information
-  const subject = typeof cert.subject === 'string'
-    ? cert.subject.match(/CN=([^,]+)/)?.[1] || 'Not Available'
-    : cert.subject?.CN || 'Not Available';
-
-  // Extract and format issuer information
-  const issuer = typeof cert.issuer === 'string'
-    ? cert.issuer.match(/O=([^,]+)/)?.[1] || 'Not Available'
-    : cert.issuer?.O || 'Not Available';
-
-  // Process validity dates
-  const validFrom = new Date(cert.validFrom).toLocaleDateString();
-  const validTo = new Date(cert.validTo).toLocaleDateString();
-  
-  return {
-    subject,
-    issuer,
-    validFrom,
-    validTo,
-    keyLength: cert.bits ? \`\${cert.bits} bits\` : 'Not Available',
-    extensions: cert.ext_key_usage || ['Standard Usage'],
-    serialNumber: cert.serialNumber,
-    version: cert.version || 'v3'
-  };
-};`} />
-                <div className="mt-4 space-y-2">
-                  <div className="p-2 rounded-lg bg-white/[0.02] border border-neutral-800">
-                    <span className="text-emerald-400/80">Domain Name Validation</span>
-                    <p className="text-sm mt-1">Validates certificate against the requested domain name using Common Name (CN) and Subject Alternative Names.</p>
-                  </div>
-                  <div className="p-2 rounded-lg bg-white/[0.02] border border-neutral-800">
-                    <span className="text-emerald-400/80">Certificate Details</span>
-                    <p className="text-sm mt-1">Extracts and displays key information including subject, issuer, validity dates, and key usage.</p>
-                  </div>
-                  <div className="p-2 rounded-lg bg-white/[0.02] border border-neutral-800">
-                    <span className="text-emerald-400/80">PEM Format</span>
-                    <p className="text-sm mt-1">Provides certificate data in both human-readable and PEM-encoded formats for download.</p>
-                  </div>
+                <div className="mt-6 space-y-4">
+                  <h3 className="text-lg font-medium text-gray-200">Features</h3>
+                  <ul className="space-y-3">
+                    {[
+                      'Real-time certificate validation',
+                      'Complete chain visualization',
+                      'Security vulnerability checks',
+                      'Detailed certificate information',
+                      'Modern and intuitive interface'
+                    ].map((feature, index) => (
+                      <motion.li
+                        key={index}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.3 + index * 0.1 }}
+                        className="flex items-center gap-2 text-gray-300"
+                      >
+                        <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                        <span>{feature}</span>
+                      </motion.li>
+                    ))}
+                  </ul>
                 </div>
-              </>
-            }
-          />
-
-          <Section
-            icon={Code2}
-            title="Technical Stack"
-            content={
-              <div className="space-y-2">
-                <p>Built with modern web technologies:</p>
-                <ul className="space-y-1 mt-2">
-                  <li>• React with TypeScript for type-safe frontend</li>
-                  <li>• Node.js backend for certificate processing</li>
-                  <li>• TLS/SSL native libraries for secure connections</li>
-                  <li>• Framer Motion for smooth animations</li>
-                  <li>• TailwindCSS for responsive design</li>
-                </ul>
               </div>
-            }
-          />
-        </div>
 
-        {/* Footer */}
-        <div className="sticky bottom-0 flex justify-between items-center p-6 bg-[#16181E] border-t border-neutral-800">
-          <div className="text-sm text-neutral-500">
-            Version 1.0.0
+              <div className="pt-6 mt-6 border-t border-white/10">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <motion.div
+                      whileHover={{ scale: 1.05 }}
+                      className="px-3 py-1 text-xs font-semibold bg-[#57A3FF]/10 text-[#57A3FF] rounded-full border border-[#57A3FF]/20"
+                    >
+                      BETA
+                    </motion.div>
+                    <span className="text-sm text-gray-500">Version 1.0.0</span>
+                  </div>
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="text-sm text-gray-400 hover:text-gray-300 transition-colors"
+                    onClick={onClose}
+                  >
+                    Close
+                  </motion.button>
+                </div>
+              </div>
+            </motion.div>
           </div>
         </div>
       </motion.div>

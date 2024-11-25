@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { CheckCircle2, XCircle, AlertCircle, ShieldCheck, Calendar, Link2, Lock, Shield } from 'lucide-react';
+import { CheckCircle2, XCircle, AlertCircle, ShieldCheck, Calendar, Link2, Lock, Shield, AlertTriangle } from 'lucide-react';
 import { ValidationIssue, Certificate, DistinguishedName } from '../types';
 
 interface SSLChecksProps {
@@ -159,69 +159,78 @@ const SSLChecks: React.FC<SSLChecksProps> = ({ certificates, validationIssues })
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4 }}
-      className="mb-6"
+      transition={{ duration: 0.5, delay: 0.2 }}
+      className="space-y-6"
     >
-      <div className="p-6 rounded-xl bg-white/[0.02] border border-neutral-800">
-        <div className="flex items-center gap-3 mb-6">
-          <ShieldCheck className="h-5 w-5 text-emerald-400/80" />
-          <h2 className="text-lg font-semibold text-gray-200">SSL Health Check</h2>
-        </div>
-        
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          {checks.map((check) => (
-            <div
-              key={check.name}
-              className="p-5 rounded-lg bg-white/[0.02] border border-neutral-800 hover:bg-white/[0.03] transition-colors"
-            >
-              <div className="flex items-start gap-4">
-                <div className={`p-2 rounded-lg ${
+      <h2 className="text-xl font-semibold text-transparent bg-clip-text bg-gradient-to-r from-gray-50 to-gray-300">
+        Security Checks
+      </h2>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {checks.map((check, index) => (
+          <motion.div
+            key={check.name}
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: index * 0.1 }}
+            className={`group relative p-5 rounded-xl border backdrop-blur-sm transition-all duration-200 ${
+              check.passed 
+                ? check.warning
+                  ? 'bg-amber-500/5 border-amber-500/20 hover:bg-amber-500/10'
+                  : 'bg-emerald-500/5 border-emerald-500/20 hover:bg-emerald-500/10'
+                : 'bg-rose-500/5 border-rose-500/20 hover:bg-rose-500/10'
+            }`}
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/[0.01] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            <div className="relative flex items-start gap-4">
+              <div className={`p-2 rounded-lg ${
+                check.passed 
+                  ? check.warning
+                    ? 'bg-amber-500/10'
+                    : 'bg-emerald-500/10'
+                  : 'bg-rose-500/10'
+              }`}>
+                {check.passed ? (
+                  check.warning ? (
+                    <AlertTriangle className="w-5 h-5 text-amber-400" />
+                  ) : (
+                    <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+                  )
+                ) : (
+                  <XCircle className="w-5 h-5 text-rose-400" />
+                )}
+              </div>
+              <div className="flex-1">
+                <h3 className={`text-base font-medium mb-1 ${
                   check.passed 
                     ? check.warning
-                      ? 'bg-amber-500/10 text-amber-500'
-                      : 'bg-emerald-400/10 text-emerald-400/80'
-                    : 'bg-rose-500/10 text-rose-500'
+                      ? 'text-amber-400'
+                      : 'text-emerald-400'
+                    : 'text-rose-400'
                 }`}>
-                  <check.icon className="h-5 w-5" />
-                </div>
-                
-                <div className="flex-1">
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className="font-medium text-gray-200">{check.name}</h3>
-                    {check.passed ? (
-                      check.warning ? (
-                        <AlertCircle className="h-5 w-5 text-amber-500" />
-                      ) : (
-                        <CheckCircle2 className="h-5 w-5 text-emerald-400/80" />
-                      )
-                    ) : (
-                      <XCircle className="h-5 w-5 text-rose-500" />
-                    )}
+                  {check.name}
+                </h3>
+                <p className="text-sm text-gray-400">{check.details}</p>
+                {check.subChecks && check.subChecks.length > 0 && (
+                  <div className="mt-2 text-xs text-gray-500">
+                    {check.subChecks.map((subCheck, index) => (
+                      <div key={index} className="flex items-center justify-between text-sm">
+                        <span className="text-gray-400">{subCheck.name}</span>
+                        <span className={`font-medium ${
+                          subCheck.passed 
+                            ? 'text-gray-200' 
+                            : 'text-rose-400'
+                        }`}>
+                          {subCheck.message}
+                        </span>
+                      </div>
+                    ))}
                   </div>
-                  
-                  <p className="text-sm text-gray-400 mb-3">{check.details}</p>
-                  
-                  {check.subChecks && check.subChecks.length > 0 && (
-                    <div className="space-y-2 border-t border-neutral-800/50 pt-3">
-                      {check.subChecks.map((subCheck, index) => (
-                        <div key={index} className="flex items-center justify-between text-sm">
-                          <span className="text-gray-400">{subCheck.name}</span>
-                          <span className={`font-medium ${
-                            subCheck.passed 
-                              ? 'text-gray-200' 
-                              : 'text-rose-500'
-                          }`}>
-                            {subCheck.message}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
+                )}
               </div>
             </div>
-          ))}
-        </div>
+          </motion.div>
+        ))}
       </div>
     </motion.div>
   );
