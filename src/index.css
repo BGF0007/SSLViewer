@@ -4,26 +4,26 @@
 
 @layer base {
   :root {
-    --background: 240 14% 15%;
-    --foreground: 220 10% 98%;
-    --card: 220 16% 25%;
-    --card-foreground: 220 10% 98%;
-    --popover: 220 16% 22%;
-    --popover-foreground: 220 10% 98%;
-    --primary: 220 10% 98%;
-    --primary-foreground: 220 16% 22%;
-    --secondary: 220 16% 30%;
-    --secondary-foreground: 220 10% 98%;
-    --muted: 220 16% 30%;
-    --muted-foreground: 220 10% 75%;
-    --accent: 220 16% 30%;
-    --accent-foreground: 220 10% 98%;
+    --background: 230 15% 5%;
+    --foreground: 210 20% 98%;
+    --card: 230 15% 7%;
+    --card-foreground: 210 20% 98%;
+    --popover: 230 15% 6%;
+    --popover-foreground: 210 20% 98%;
+    --primary: 210 20% 98%;
+    --primary-foreground: 230 15% 6%;
+    --secondary: 230 15% 10%;
+    --secondary-foreground: 210 20% 98%;
+    --muted: 230 15% 10%;
+    --muted-foreground: 210 20% 80%;
+    --accent: 230 15% 10%;
+    --accent-foreground: 210 20% 98%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
-    --border: 220 16% 30%;
-    --input: 220 16% 30%;
-    --ring: 220 16% 55%;
-    --radius: 0.25rem;
+    --border: 230 15% 10%;
+    --input: 230 15% 10%;
+    --ring: 230 15% 55%;
+    --radius: 0.75rem;
   }
 }
 
@@ -33,40 +33,104 @@
   }
   body {
     @apply bg-background text-foreground;
+    background: radial-gradient(circle at top, hsl(230 15% 8%), hsl(230 15% 3%));
+    min-height: 100vh;
   }
+}
+
+/* Form styles */
+.form-input {
+  @apply w-full px-4 py-3 rounded-xl bg-white/[0.02] border border-white/10 
+    focus:border-white/20 focus:ring-1 focus:ring-white/20 
+    placeholder:text-white/20 text-white/90
+    transition-all duration-200;
+}
+
+.form-input:hover {
+  @apply bg-white/[0.03] border-white/15;
+}
+
+.form-input:focus {
+  @apply outline-none bg-white/[0.04];
+}
+
+.form-label {
+  @apply block text-sm font-medium text-white/60 mb-2;
 }
 
 /* Custom shadows */
 .drop-shadow-glow-green {
-  filter: drop-shadow(0 0 8px rgba(37, 255, 190, 0.3));
+  filter: drop-shadow(0 0 12px rgba(37, 255, 190, 0.4));
 }
 
 .drop-shadow-glow-red {
-  filter: drop-shadow(0 0 8px rgba(255, 86, 86, 0.3));
+  filter: drop-shadow(0 0 12px rgba(255, 86, 86, 0.4));
 }
 
 /* Glass morphism effects */
 .glass-effect {
   backdrop-filter: blur(12px);
   background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
 }
 
-/* Modern scrollbar styles */
+.glass-effect-hover:hover {
+  background: rgba(255, 255, 255, 0.03);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+/* Switch styles */
+.switch-container {
+  @apply flex p-0.5 rounded-2xl bg-white/[0.03] border border-white/10 backdrop-blur-md;
+}
+
+.switch-button {
+  @apply px-6 py-2.5 rounded-xl text-sm font-medium transition-all duration-300;
+}
+
+.switch-button-active {
+  @apply bg-white/[0.06] text-white shadow-lg border border-white/10;
+}
+
+.switch-button-inactive {
+  @apply text-white/40 hover:text-white/60;
+}
+
+/* Gradient animations */
+.animate-gradient-shift {
+  animation: gradient-shift 8s ease infinite;
+  background-size: 400% 400%;
+}
+
+@keyframes gradient-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Custom scrollbar */
 ::-webkit-scrollbar {
-  width: 4px;
-  height: 4px;
+  width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: transparent;
+  background: rgba(255, 255, 255, 0.01);
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: hsl(0 0% 80%);
-  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: hsl(0 0% 70%);
+  background: rgba(255, 255, 255, 0.08);
 }

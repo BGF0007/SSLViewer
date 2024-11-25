@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Globe, AlertCircle, ArrowRight } from 'lucide-react';
+import { Globe, AlertCircle, ArrowRight, CheckCircle2 } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import '../styles/transitions.css';
 
@@ -80,7 +80,7 @@ const CertificateForm: React.FC<CertificateFormProps> = ({ onSubmit, loading }) 
 
   return (
     <form onSubmit={handleSubmit} className="relative">
-      <div className="max-w-xl mx-auto space-y-4">
+      <div className="w-full space-y-6">
         <AnimatePresence>
           {(hostnameError || portError) && (
             <motion.div
@@ -106,7 +106,7 @@ const CertificateForm: React.FC<CertificateFormProps> = ({ onSubmit, loading }) 
           )}
         </AnimatePresence>
 
-        <div className="flex flex-col sm:flex-row gap-4">
+        <div className="flex flex-col sm:flex-row gap-6">
           <div className="flex-1 relative group">
             <div className="relative">
               <Globe className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 transition-colors duration-200 group-hover:text-gray-300" />
@@ -117,7 +117,7 @@ const CertificateForm: React.FC<CertificateFormProps> = ({ onSubmit, loading }) 
                 onBlur={() => setTouched({ ...touched, hostname: true })}
                 onKeyDown={handleKeyDown}
                 placeholder="Enter domain name (e.g., example.com)"
-                className={`w-full pl-12 pr-4 py-3.5 bg-white/[0.03] border ${
+                className={`w-full pl-12 pr-4 py-4 bg-white/[0.02] border ${
                   touched.hostname && !validState.hostname
                     ? 'border-rose-500/50 focus:border-rose-500'
                     : touched.hostname && validState.hostname
@@ -130,20 +130,34 @@ const CertificateForm: React.FC<CertificateFormProps> = ({ onSubmit, loading }) 
                     : touched.hostname && validState.hostname
                     ? 'focus:ring-emerald-500/10'
                     : 'focus:ring-white/5'
-                }`}
+                } shadow-lg shadow-black/10`}
               />
+              {touched.hostname && validState.hostname && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="absolute right-4 top-1/2 transform -translate-y-1/2"
+                >
+                  <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+                </motion.div>
+              )}
+            </div>
+            <div className="mt-2 flex items-center gap-3">
+              <div className="h-px flex-1 bg-gradient-to-r from-white/[0.01] via-white/5 to-white/[0.01]" />
+              <span className="text-xs text-gray-500">SSL Certificate Inspection</span>
+              <div className="h-px flex-1 bg-gradient-to-r from-white/[0.01] via-white/5 to-white/[0.01]" />
             </div>
           </div>
 
-          <div className="w-full sm:w-32">
+          <div className="w-full sm:w-48">
             <input
               type="text"
               value={port}
               onChange={handlePortChange}
               onBlur={() => setTouched({ ...touched, port: true })}
               onKeyDown={handleKeyDown}
-              placeholder="Port"
-              className={`w-full px-4 py-3.5 bg-white/[0.03] border ${
+              placeholder="Port (default: 443)"
+              className={`w-full px-4 py-4 bg-white/[0.02] border ${
                 touched.port && !validState.port
                   ? 'border-rose-500/50 focus:border-rose-500'
                   : touched.port && validState.port && port
@@ -156,7 +170,7 @@ const CertificateForm: React.FC<CertificateFormProps> = ({ onSubmit, loading }) 
                   : touched.port && validState.port && port
                   ? 'focus:ring-emerald-500/10'
                   : 'focus:ring-white/5'
-              }`}
+              } shadow-lg shadow-black/10`}
             />
           </div>
         </div>
@@ -166,14 +180,14 @@ const CertificateForm: React.FC<CertificateFormProps> = ({ onSubmit, loading }) 
           whileTap={{ scale: 0.99 }}
           type="submit"
           disabled={loading || !hostname || !validState.hostname || !validState.port}
-          className={`group w-full mt-4 px-6 py-3.5 flex items-center justify-center gap-3 rounded-xl font-medium transition-all duration-200 ${
+          className={`group w-full mt-6 px-8 py-4 flex items-center justify-center gap-3 rounded-xl font-medium transition-all duration-200 ${
             loading || !hostname || !validState.hostname || !validState.port
-              ? 'bg-gray-400/10 text-gray-500 cursor-not-allowed'
-              : 'bg-white/[0.03] hover:bg-white/[0.06] text-gray-100 border border-white/10 hover:border-white/20 backdrop-blur-sm'
+              ? 'bg-white/[0.02] text-gray-500 cursor-not-allowed border border-white/5'
+              : 'bg-gradient-to-r from-white/5 to-white/10 hover:from-white/10 hover:to-white/20 text-gray-100 border border-white/10 hover:border-white/20 backdrop-blur-sm shadow-lg shadow-black/10'
           }`}
         >
           {loading ? (
-            <div className="w-5 h-5 border-2 border-gray-400 border-t-white rounded-full animate-spin" />
+            <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
           ) : (
             <>
               <span>Check Certificate</span>
@@ -182,20 +196,20 @@ const CertificateForm: React.FC<CertificateFormProps> = ({ onSubmit, loading }) 
           )}
         </motion.button>
 
-        <div className="mt-6 flex flex-wrap gap-4 justify-center text-xs text-gray-400">
+        <div className="mt-6 flex flex-wrap gap-4 justify-center">
           <motion.div 
             whileHover={{ scale: 1.05 }}
-            className="flex items-center gap-2 bg-white/[0.03] px-3 py-2 rounded-full border border-white/5"
+            className="flex items-center gap-2 bg-white/[0.02] px-3 py-2 rounded-full border border-white/5 shadow-lg shadow-black/10"
           >
             <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-lg shadow-emerald-500/20"></div>
-            <span>Certificate Validation</span>
+            <span className="text-xs text-gray-400">Certificate Validation</span>
           </motion.div>
           <motion.div 
             whileHover={{ scale: 1.05 }}
-            className="flex items-center gap-2 bg-white/[0.03] px-3 py-2 rounded-full border border-white/5"
+            className="flex items-center gap-2 bg-white/[0.02] px-3 py-2 rounded-full border border-white/5 shadow-lg shadow-black/10"
           >
             <div className="w-2 h-2 rounded-full bg-blue-500 shadow-lg shadow-blue-500/20"></div>
-            <span>Chain Verification</span>
+            <span className="text-xs text-gray-400">Chain Verification</span>
           </motion.div>
         </div>
       </div>

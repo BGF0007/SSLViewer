@@ -16,6 +16,17 @@ export interface Certificate {
   fingerprint256?: string;
   fingerprint512?: string;
   subjectaltname?: string;
+  connection?: {
+    protocol: string;
+    cipher: string;
+    cipherVersion: string;
+    serverName?: string;
+    authorized: boolean;
+  };
+  publicKey?: {
+    type: any;
+    size: any;
+  };
 }
 
 export interface CertificateError {

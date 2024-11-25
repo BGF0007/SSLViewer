@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Shield, ShieldAlert, ChevronDown, Clock, CheckCircle2, XCircle, Calendar, Lock, Download, FileText } from 'lucide-react';
+import { Shield, ShieldAlert, ChevronDown, Clock, CheckCircle2, XCircle, Calendar, Lock, Download, FileText, AlertCircle } from 'lucide-react';
 import { Certificate } from '../types';
 import CertificateChain from './CertificateChain';
 import { generateCSVReport, generateHTMLReport } from '../utils/reportGenerator';
+import { getCertificateStatus, getDaysRemainingText } from '../utils/certificateStatus';
 
 interface BatchResult {
   domain: string;
@@ -43,6 +44,40 @@ const BatchResults = ({ results }: BatchResultsProps) => {
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
+  };
+
+  const getCertificateStatusDisplay = (certificates: Certificate[]) => {
+    if (!certificates.length) return null;
+    const status = getCertificateStatus(certificates[0]);
+    
+    if (status.status === 'expired') {
+      return (
+        <span className="text-sm text-rose-400/80 flex items-center gap-2">
+          <XCircle className="w-4 h-4" />
+          Certificate expired
+        </span>
+      );
+    }
+    
+    if (status.status === 'warning') {
+      return (
+        <span className="text-sm text-yellow-400/80 flex items-center gap-2">
+          <AlertCircle className="w-4 h-4" />
+          {getDaysRemainingText(status.days)}
+        </span>
+      );
+    }
+    
+    if (status.status === 'notice') {
+      return (
+        <span className="text-sm text-blue-400/80 flex items-center gap-2">
+          <Clock className="w-4 h-4" />
+          {getDaysRemainingText(status.days)}
+        </span>
+      );
+    }
+
+    return null;
   };
 
   return (
@@ -192,20 +227,17 @@ const BatchResults = ({ results }: BatchResultsProps) => {
                         <h3 className="text-lg font-medium text-white group-hover:text-white/90 transition-colors duration-200">
                           {result.domain}
                         </h3>
-                        <span className={`text-xs px-3 py-1 rounded-full flex items-center gap-1.5 ${
-                          result.error 
-                            ? 'bg-rose-500/10 text-rose-400' 
-                            : 'bg-emerald-500/10 text-emerald-400'
-                        }`}>
-                          <Lock className="w-3 h-3" />
+                        <span className="text-sm text-white/40">
                           Port {result.port}
                         </span>
                       </div>
-                      {result.error && (
+                      {result.error ? (
                         <p className="text-sm text-rose-400/80 mt-1 flex items-center gap-2">
                           <XCircle className="w-4 h-4" />
                           {result.error}
                         </p>
+                      ) : (
+                        getCertificateStatusDisplay(result.certificates)
                       )}
                     </div>
                   </div>

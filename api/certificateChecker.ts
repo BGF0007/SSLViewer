@@ -38,7 +38,18 @@ export async function checkCertificate(hostname: string, port: number = 443): Pr
 
         logCertificateData(cert);
         console.log('Certificate received, parsing chain');
-        const chain = parseChain(cert);
+        const connectionInfo = {
+          protocol: socket.getProtocol(),
+          cipherSuite: socket.getCipher().name,
+          tlsVersion: socket.getCipher().version,
+          authorized: socket.authorized,
+          authorizationError: socket.authorizationError,
+        };
+
+        const chain = parseChain(cert).map(cert => ({
+          ...cert,
+          connectionInfo,
+        }));
         socket.end();
         socketClosed = true;
         console.log(`Successfully parsed certificate chain with ${chain.length} certificates`);
@@ -100,6 +111,11 @@ function parseChain(cert: any): Certificate[] {
       fingerprint256: current.fingerprint256,
       fingerprint512: current.fingerprint512,
       subjectaltname: current.subjectaltname,
+      signatureAlgorithm: current.signatureAlgorithm,
+      publicKey: {
+        type: current.publicKeyType,
+        size: current.publicKeySize,
+      },
       ...(current.subjectaltname && determineCertType(current) === 'leaf' ? {
         sans: current.subjectaltname.split(', ').map((san: string) => san.replace('DNS:', ''))
       } : {}),

@@ -19,8 +19,9 @@ interface BatchResult {
 
 const App = () => {
   useEffect(() => {
+    window.scrollTo(0, 0);
     document.documentElement.classList.add('dark');
-    document.body.className = 'min-h-screen bg-green';
+    document.body.className = 'min-h-screen bg-[#0A0A0A]';
   }, []);
 
   const [loading, setLoading] = useState(false);
@@ -151,195 +152,211 @@ const App = () => {
   };
 
   return (
-    <div className="min-h-screen text-gray-100 relative flex flex-col">
-      {/* Animated background elements */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute inset-0 bg-gradient-to-tr from-gray-500/[0.02] via-transparent to-gray-500/[0.02] animate-gradient-shift"></div>
-        <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-[0.01] bg-repeat"></div>
-      </div>
-      <Analytics/>
-      {/* Main content */}
-      <div className="relative flex-1 overflow-y-auto">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12 w-full flex flex-col min-h-screen">
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4 }}
-            className="mb-12"
-          >
-            <div className="flex items-center justify-between flex-col sm:flex-row gap-6">
-              <div className="flex items-center space-x-4">
+    <div className="min-h-screen relative text-white pt-8">
+      {/* Fixed Background */}
+      <div className="fixed inset-0 bg-[#0A0A0A]" />
+      <div className="fixed inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white/[0.03] via-transparent to-transparent" />
+      
+      {/* Content */}
+      <div className="relative">
+        <div className="container mx-auto p-6 sm:p-8 max-w-[1920px]">
+          <div className="flex justify-between items-center mb-16">
+            <div className="relative flex-1">
+              <div className="max-w-5xl mx-auto w-full flex flex-col min-h-screen">
                 <motion.div 
-                  whileHover={{ scale: 1.05 }}
-                  transition={{ type: "spring", stiffness: 400, damping: 10 }}
-                  className="relative group"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4 }}
+                  className="mb-16"
                 >
-                  <div className="relative">
-                    {error ? (
-                      <ShieldAlert className="h-10 w-10 text-rose-400/90 drop-shadow-sm transition-transform duration-200 group-hover:scale-110" />
-                    ) : (
-                      <Shield className="h-10 w-10 text-[#25FFBE]/90 drop-shadow-sm transition-transform duration-200 group-hover:scale-110" />
-                    )}
-                    <div className="absolute inset-0 animate-pulse-slow opacity-40 blur-sm">
-                      {error ? (
-                        <ShieldAlert className="h-10 w-10 text-rose-400/70" />
-                      ) : (
-                        <Shield className="h-10 w-10 text-[#25FFBE]/70" />
-                      )}
+                  <div className="flex items-center justify-between flex-col sm:flex-row gap-8">
+                    <div className="flex items-center space-x-6">
+                      <motion.div 
+                        whileHover={{ scale: 1.1 }}
+                        transition={{ type: "spring", stiffness: 500, damping: 20 }}
+                        className="relative group"
+                      >
+                        <div className="relative">
+                          {error ? (
+                            <div className="relative">
+                              <ShieldAlert className="h-12 w-12 text-rose-400/90 drop-shadow-lg transition-transform duration-200 group-hover:scale-110" />
+                              <div className="absolute inset-0 animate-pulse-slow opacity-50 blur-md">
+                                <ShieldAlert className="h-12 w-12 text-rose-400/70" />
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="relative">
+                              <Shield className="h-12 w-12 text-[#25FFBE]/90 drop-shadow-lg transition-transform duration-200 group-hover:scale-110" />
+                              <div className="absolute inset-0 animate-pulse-slow opacity-50 blur-md">
+                                <Shield className="h-12 w-12 text-[#25FFBE]/70" />
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </motion.div>
+                      <div>
+                        <div className="flex items-center gap-4 mb-3">
+                          <motion.h1 
+                            className="text-4xl font-medium text-transparent bg-clip-text bg-gradient-to-r from-white to-white/70"
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ duration: 0.4, delay: 0.1 }}
+                          >
+                            SSL Viewer
+                          </motion.h1>
+                          <motion.div 
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ delay: 0.2 }}
+                            className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/[0.05] border border-white/10 backdrop-blur-sm shadow-lg shadow-black/20"
+                          >
+                            <div className="w-1.5 h-1.5 rounded-full bg-[#25FFBE] animate-pulse shadow-lg shadow-[#25FFBE]/20"></div>
+                            <span className="text-[11px] font-medium text-white/50 tracking-wide">BETA</span>
+                          </motion.div>
+                        </div>
+                        <motion.p 
+                          className="text-sm text-white/50"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          transition={{ duration: 0.4, delay: 0.2 }}
+                        >
+                          Inspect SSL certificates with ease
+                        </motion.p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 bg-white/[0.02] p-1 rounded-full border border-white/5 backdrop-blur-sm">
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={() => setIsBatchMode(!isBatchMode)}
+                        className={`px-4 py-2 text-xs rounded-full transition-all duration-300 ${
+                          !isBatchMode
+                            ? 'bg-white/10 text-white shadow-lg shadow-black/10 border border-white/10'
+                            : 'text-white/60 hover:text-white/80'
+                        }`}
+                      >
+                        Single Check
+                      </motion.button>
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={() => setIsBatchMode(!isBatchMode)}
+                        className={`px-4 py-2 text-xs rounded-full transition-all duration-300 ${
+                          isBatchMode
+                            ? 'bg-white/10 text-white shadow-lg shadow-black/10 border border-white/10'
+                            : 'text-white/60 hover:text-white/80'
+                        }`}
+                      >
+                        Batch Check
+                      </motion.button>
                     </div>
                   </div>
                 </motion.div>
-                <div>
-                  <div className="flex items-center gap-3 mb-2">
-                    <motion.h1 
-                      className="text-3xl font-medium text-transparent bg-clip-text bg-gradient-to-r from-gray-50/90 via-gray-100/90 to-gray-50/90 tracking-tight"
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ duration: 0.4, delay: 0.1 }}
-                    >
-                      SSL Viewer
-                    </motion.h1>
-                    <motion.div 
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ delay: 0.2 }}
-                      className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-white/[0.03] border border-white/5 backdrop-blur-sm"
-                    >
-                      <div className="w-1 h-1 rounded-full bg-red-400"></div>
-                      <span className="text-[11px] text-white/40">BETA</span>
-                    </motion.div>
-                  </div>
-                  <motion.p 
-                    className="text-sm text-white/40"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.4, delay: 0.2 }}
+
+                <AnimatePresence>
+                  {showAbout && <About onClose={() => setShowAbout(false)} />}
+                </AnimatePresence>
+
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 0.2 }}
+                  className="w-full rounded-3xl border border-white/10 bg-black/20 backdrop-blur-xl p-8 sm:p-12 shadow-2xl"
+                >
+                  <motion.div 
+                    className="mb-12 text-center"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4, delay: 0.4 }}
                   >
-                    Inspect SSL certificates with ease
-                  </motion.p>
+                    <h2 className="text-2xl font-semibold mb-3 text-transparent bg-clip-text bg-gradient-to-r from-white to-white/80">
+                      {isBatchMode ? 'Batch Check SSL Certificates' : 'Check SSL Certificate'}
+                    </h2>
+                    <p className="text-sm text-white/40">
+                      {isBatchMode 
+                        ? 'Enter multiple domains or upload a CSV file to check multiple certificates at once'
+                        : 'Enter a domain name to inspect its SSL certificates and security status'
+                      }
+                    </p>
+                  </motion.div>
+                  
+                  <div className="bg-black/40 rounded-2xl border border-white/10 p-8 sm:p-12 backdrop-blur-xl shadow-inner">
+                    {isBatchMode ? (
+                      <BatchCertificateForm onSubmit={handleBatchSubmit} loading={loading} />
+                    ) : (
+                      <CertificateForm onSubmit={handleSingleSubmit} loading={loading} />
+                    )}
+                  </div>
+                </motion.div>
+
+                {/* Results Section */}
+                <div className="relative z-10">
+                  <AnimatePresence>
+                    {((certificates.length > 0 || error) && !isBatchMode) && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        transition={{ duration: 0.5 }}
+                        className="mt-12"
+                      >
+                        {error ? (
+                          <div className="p-6 rounded-2xl bg-rose-500/10 border border-rose-500/20 backdrop-blur-sm">
+                            <div className="flex items-center gap-3 text-rose-400">
+                              <AlertCircle className="w-5 h-5" />
+                              {error}
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="space-y-8">
+                            <SSLChecks certificates={certificates} validationIssues={validationIssues} />
+                            <div className="relative">
+                              <CertificateChain certificates={certificates} domain={searchedDomain} />
+                            </div>
+                          </div>
+                        )}
+                      </motion.div>
+                    )}
+
+                    {batchResults.length > 0 && isBatchMode && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        transition={{ duration: 0.5 }}
+                        className="mt-12"
+                      >
+                        <BatchResults results={batchResults} />
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
-              </div>
 
-              <div className="flex items-center gap-2">
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => setIsBatchMode(!isBatchMode)}
-                  className={`px-3 py-1.5 text-xs rounded-full border backdrop-blur-sm transition-all duration-300 ${
-                    isBatchMode
-                      ? 'bg-white/[0.03] border-white/10 text-white/60'
-                      : 'bg-white/[0.06] border-white/20 text-white/80'
-                  }`}
-                >
-                  Single Check
-                </motion.button>
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => setIsBatchMode(!isBatchMode)}
-                  className={`px-3 py-1.5 text-xs rounded-full border backdrop-blur-sm transition-all duration-300 ${
-                    !isBatchMode
-                      ? 'bg-white/[0.03] border-white/10 text-white/60'
-                      : 'bg-white/[0.06] border-white/20 text-white/80'
-                  }`}
-                >
-                  Batch Check
-                </motion.button>
-              </div>
-            </div>
-          </motion.div>
-
-          <AnimatePresence>
-            {showAbout && <About onClose={() => setShowAbout(false)} />}
-          </AnimatePresence>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="w-full rounded-3xl border border-white/10 bg-black/40 backdrop-blur-xl p-8 sm:p-14 shadow-2xl"
-          >
-            <div className="max-w-2xl mx-auto">
-              <motion.div 
-                className="mb-8 text-center"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: 0.4 }}
-              >
-                <h2 className="text-2xl font-semibold mb-3 text-transparent bg-clip-text bg-gradient-to-r from-gray-50 to-gray-300">
-                  {isBatchMode ? 'Batch Check SSL Certificates' : 'Check SSL Certificate'}
-                </h2>
-                <p className="text-sm text-gray-400">
-                  {isBatchMode 
-                    ? 'Enter multiple domains or upload a CSV file to check multiple certificates at once'
-                    : 'Enter a domain name to inspect its SSL certificates and security status'
-                  }
-                </p>
-              </motion.div>
-              
-              <div className="bg-black/20 rounded-2xl border border-white/10 p-6 sm:p-8 backdrop-blur-xl shadow-inner">
-                {isBatchMode ? (
-                  <BatchCertificateForm onSubmit={handleBatchSubmit} loading={loading} />
-                ) : (
-                  <CertificateForm onSubmit={handleSingleSubmit} loading={loading} />
-                )}
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Results Section */}
-          <AnimatePresence>
-            {((certificates.length > 0 || error) && !isBatchMode) && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.5 }}
-                className="mt-8"
-              >
-                {error ? (
-                  <div className="p-6 rounded-2xl bg-rose-500/10 border border-rose-500/20 backdrop-blur-sm">
-                    <div className="flex items-center gap-3 text-rose-400">
-                      <AlertCircle className="w-5 h-5" />
-                      <p>{error}</p>
+                <footer className="mt-auto pt-12 border-t border-white/5">
+                  <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-white/40">
+                    <p> 2024 SSL Viewer</p>
+                    <div className="flex items-center space-x-6">
+                      <button 
+                        onClick={() => setShowAbout(true)}
+                        className="hover:text-white/60 transition-colors"
+                      >
+                        About
+                      </button>
+                      <a 
+                        href="https://github.com/bgf0007" 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="hover:text-white/60 transition-colors"
+                      >
+                        GitHub
+                      </a>
                     </div>
                   </div>
-                ) : (
-                  <div className="space-y-8">
-                    <SSLChecks certificates={certificates} validationIssues={validationIssues} />
-                    <CertificateChain certificates={certificates} domain={searchedDomain} />
-                  </div>
-                )}
-              </motion.div>
-            )}
-
-            {batchResults.length > 0 && isBatchMode && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.5 }}
-                className="mt-8"
-              >
-                <BatchResults results={batchResults} />
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          <footer className="mt-auto pt-8 border-t border-white/5">
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-gray-500">
-              <p> 2024 SSL Viewer</p>
-              <div className="flex items-center space-x-6">
-                <button 
-                  onClick={() => setShowAbout(true)}
-                  className="hover:text-gray-300"
-                >
-                  About
-                </button>
-                <a href="https://github.com/bgf0007" target="_blank" rel="noopener noreferrer" className="hover:text-gray-300">GitHub</a>
+                </footer>
               </div>
             </div>
-          </footer>
+          </div>
         </div>
       </div>
     </div>

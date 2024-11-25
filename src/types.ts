@@ -5,6 +5,45 @@ export interface DistinguishedName {
   [key: string]: string | undefined;
 }
 
+export interface PublicKey {
+  type: string;
+  size: number;
+  algorithm?: string;
+  exponent?: string;
+  modulus?: string;
+}
+
+export interface OCSPResponse {
+  status: string;
+  producedAt?: string;
+  thisUpdate?: string;
+  nextUpdate?: string;
+  revocationReason?: string;
+}
+
+export interface TLSConnectionInfo {
+  protocol: string;
+  cipherSuite: string;
+  tlsVersion: string;
+  serverName?: string;
+  signatureAlgorithm: string;
+  publicKey: PublicKey;
+  ocspResponse?: OCSPResponse;
+  scts?: Array<{
+    version: number;
+    logId: string;
+    timestamp: string;
+    signature: string;
+  }>;
+  verificationResults?: {
+    [key: string]: boolean;
+  };
+  securityLevel?: 'A+' | 'A' | 'B' | 'C' | 'D' | 'F';
+  supportedProtocols?: string[];
+  supportedCiphers?: string[];
+  securityIssues?: string[];
+}
+
 export interface Certificate {
   type: 'Leaf' | 'Intermediate' | 'Root';
   subject: string | DistinguishedName;
@@ -13,11 +52,14 @@ export interface Certificate {
   validTo: string;
   serialNumber: string;
   bits?: number;
-  ext_key_usage?: string[];
-  fingerprint?: string;
-  fingerprint256?: string;
-  fingerprint512?: string;
-  version?: string | number; 
+  keyUsage?: string[];
+  extendedKeyUsage?: string[];
+  fingerprint?: {
+    sha1?: string;
+    sha256?: string;
+    sha512?: string;
+  };
+  version?: string | number;
   sans?: string[];
   subjectaltname?: string;
   infoAccess?: {
@@ -27,6 +69,7 @@ export interface Certificate {
   status: string;
   raw: string;
   pemEncoded: string;
+  connectionInfo?: TLSConnectionInfo;
 }
 
 export interface ValidationIssue {
@@ -36,6 +79,9 @@ export interface ValidationIssue {
 }
 
 export interface ValidateResponse {
-  certificates: Certificate[];
+  success: boolean;
+  chain: Certificate[];
   validationIssues: ValidationIssue[];
+  error?: string;
+  details?: Array<{ msg: string }>;
 }
