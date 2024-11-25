@@ -1,16 +1,26 @@
 import { useState, useEffect } from 'react';
-import { Shield, ShieldAlert, AlertCircle } from 'lucide-react';
+import { Shield, ShieldAlert, AlertCircle, ListChecks } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import CertificateForm from './components/CertificateForm';
+import BatchCertificateForm from './components/BatchCertificateForm';
 import CertificateChain from './components/CertificateChain';
+import BatchResults from './components/BatchResults';
 import About from './components/About';
 import { Analytics } from "@vercel/analytics/react"
 import SSLChecks from './components/SSLChecks';
 import { Certificate, ValidationIssue } from './types';
 
+interface BatchResult {
+  domain: string;
+  port: number;
+  certificates: Certificate[];
+  error?: string;
+}
+
 const App = () => {
   useEffect(() => {
     document.documentElement.classList.add('dark');
+    document.body.className = 'min-h-screen bg-green';
   }, []);
 
   const [loading, setLoading] = useState(false);
@@ -19,13 +29,16 @@ const App = () => {
   const [validationIssues, setValidationIssues] = useState<ValidationIssue[]>([]);
   const [showAbout, setShowAbout] = useState(false);
   const [searchedDomain, setSearchedDomain] = useState<string>('');
+  const [isBatchMode, setIsBatchMode] = useState(false);
+  const [batchResults, setBatchResults] = useState<BatchResult[]>([]);
 
-  const handleSubmit = async (hostname: string, port?: number) => {
+  const handleSingleSubmit = async (hostname: string, port?: number) => {
     setLoading(true);
     setError(null);
     setCertificates([]);
     setValidationIssues([]);
     setSearchedDomain(hostname);
+    setBatchResults([]);
 
     try {
       const apiUrl = process.env.NODE_ENV === 'production' 
@@ -67,25 +80,95 @@ const App = () => {
     }
   };
 
+  const handleBatchSubmit = async (domains: Array<{ hostname: string; port?: number }>) => {
+    setLoading(true);
+    setError(null);
+    setCertificates([]);
+    setValidationIssues([]);
+    setBatchResults([]);
+
+    const results: BatchResult[] = [];
+    const apiUrl = process.env.NODE_ENV === 'production' 
+      ? '/api/certificates'
+      : 'http://localhost:3000/api/certificates';
+
+    for (const { hostname, port } of domains) {
+      try {
+        const response = await fetch(apiUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify({
+            hostname,
+            port: port || 443
+          })
+        });
+
+        if (!response.ok) {
+          results.push({
+            domain: hostname,
+            port: port || 443,
+            certificates: [],
+            error: `HTTP error! status: ${response.status}`
+          });
+          continue;
+        }
+
+        const result = await response.json();
+
+        if (result.success) {
+          results.push({
+            domain: hostname,
+            port: port || 443,
+            certificates: result.chain
+          });
+        } else {
+          let errorMessage = result.error;
+          if (result.details && Array.isArray(result.details)) {
+            errorMessage = result.details.map((err: any) => err.msg).join(', ');
+          }
+          results.push({
+            domain: hostname,
+            port: port || 443,
+            certificates: [],
+            error: errorMessage || 'Failed to validate certificate'
+          });
+        }
+      } catch (err) {
+        results.push({
+          domain: hostname,
+          port: port || 443,
+          certificates: [],
+          error: err instanceof Error ? err.message : 'An error occurred while fetching certificate'
+        });
+      }
+    }
+
+    setBatchResults(results);
+    setLoading(false);
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#0C0B0B] via-[#121212] to-[#0C0C0C] text-gray-100 relative flex flex-col">
+    <div className="min-h-screen text-gray-100 relative flex flex-col">
       {/* Animated background elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute inset-0 bg-gradient-to-tr from-blue-500/5 via-transparent to-emerald-500/5 animate-gradient-shift"></div>
-        <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-[0.02] bg-repeat"></div>
+        <div className="absolute inset-0 bg-gradient-to-tr from-gray-500/[0.02] via-transparent to-gray-500/[0.02] animate-gradient-shift"></div>
+        <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-[0.01] bg-repeat"></div>
       </div>
       <Analytics/>
       {/* Main content */}
       <div className="relative flex-1 overflow-y-auto">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-12 sm:py-16 w-full flex flex-col min-h-screen">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12 w-full flex flex-col min-h-screen">
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="mb-16"
+            transition={{ duration: 0.4 }}
+            className="mb-12"
           >
-            <div className="flex items-center justify-between flex-col sm:flex-row gap-8">
-              <div className="flex items-center space-x-6">
+            <div className="flex items-center justify-between flex-col sm:flex-row gap-6">
+              <div className="flex items-center space-x-4">
                 <motion.div 
                   whileHover={{ scale: 1.05 }}
                   transition={{ type: "spring", stiffness: 400, damping: 10 }}
@@ -93,50 +176,75 @@ const App = () => {
                 >
                   <div className="relative">
                     {error ? (
-                      <ShieldAlert className="h-12 w-12 text-rose-400 drop-shadow-glow-red transition-transform duration-200 group-hover:scale-110" />
+                      <ShieldAlert className="h-10 w-10 text-rose-400/90 drop-shadow-sm transition-transform duration-200 group-hover:scale-110" />
                     ) : (
-                      <Shield className="h-12 w-12 text-[#25FFBE] drop-shadow-glow-green transition-transform duration-200 group-hover:scale-110" />
+                      <Shield className="h-10 w-10 text-[#25FFBE]/90 drop-shadow-sm transition-transform duration-200 group-hover:scale-110" />
                     )}
-                    <div className="absolute inset-0 animate-pulse-slow opacity-50 blur-md">
+                    <div className="absolute inset-0 animate-pulse-slow opacity-40 blur-sm">
                       {error ? (
-                        <ShieldAlert className="h-12 w-12 text-rose-400" />
+                        <ShieldAlert className="h-10 w-10 text-rose-400/70" />
                       ) : (
-                        <Shield className="h-12 w-12 text-[#25FFBE]" />
+                        <Shield className="h-10 w-10 text-[#25FFBE]/70" />
                       )}
                     </div>
                   </div>
                 </motion.div>
                 <div>
-                  <div className="flex items-center gap-4 mb-3">
+                  <div className="flex items-center gap-3 mb-2">
                     <motion.h1 
-                      className="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-gray-50 via-blue-100 to-emerald-200 tracking-tight"
+                      className="text-3xl font-medium text-transparent bg-clip-text bg-gradient-to-r from-gray-50/90 via-gray-100/90 to-gray-50/90 tracking-tight"
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
-                      transition={{ duration: 0.6, delay: 0.2 }}
+                      transition={{ duration: 0.4, delay: 0.1 }}
                     >
                       SSL Viewer
                     </motion.h1>
-                    <motion.span 
-                      whileHover={{ scale: 1.05 }}
-                      className="px-3 py-1 text-xs font-semibold bg-[#57A3FF]/10 text-[#57A3FF] rounded-full border border-[#57A3FF]/20 backdrop-blur-sm shadow-lg"
+                    <motion.div 
                       initial={{ opacity: 0, scale: 0.9 }}
                       animate={{ opacity: 1, scale: 1 }}
-                      transition={{ duration: 0.3, delay: 0.4 }}
+                      transition={{ delay: 0.2 }}
+                      className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-white/[0.03] border border-white/5 backdrop-blur-sm"
                     >
-                      BETA
-                    </motion.span>
+                      <div className="w-1 h-1 rounded-full bg-red-400"></div>
+                      <span className="text-[11px] text-white/40">BETA</span>
+                    </motion.div>
                   </div>
-                  <motion.div 
-                    className="flex items-center gap-4 flex-wrap"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.4, delay: 0.3 }}
+                  <motion.p 
+                    className="text-sm text-white/40"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.4, delay: 0.2 }}
                   >
-                    <p className="text-base text-gray-300 font-medium">
-                      Validate and inspect SSL certificates instantly
-                    </p>
-                  </motion.div>
+                    Inspect SSL certificates with ease
+                  </motion.p>
                 </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => setIsBatchMode(!isBatchMode)}
+                  className={`px-3 py-1.5 text-xs rounded-full border backdrop-blur-sm transition-all duration-300 ${
+                    isBatchMode
+                      ? 'bg-white/[0.03] border-white/10 text-white/60'
+                      : 'bg-white/[0.06] border-white/20 text-white/80'
+                  }`}
+                >
+                  Single Check
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => setIsBatchMode(!isBatchMode)}
+                  className={`px-3 py-1.5 text-xs rounded-full border backdrop-blur-sm transition-all duration-300 ${
+                    !isBatchMode
+                      ? 'bg-white/[0.03] border-white/10 text-white/60'
+                      : 'bg-white/[0.06] border-white/20 text-white/80'
+                  }`}
+                >
+                  Batch Check
+                </motion.button>
               </div>
             </div>
           </motion.div>
@@ -159,22 +267,29 @@ const App = () => {
                 transition={{ duration: 0.4, delay: 0.4 }}
               >
                 <h2 className="text-2xl font-semibold mb-3 text-transparent bg-clip-text bg-gradient-to-r from-gray-50 to-gray-300">
-                  Check SSL Certificate
+                  {isBatchMode ? 'Batch Check SSL Certificates' : 'Check SSL Certificate'}
                 </h2>
                 <p className="text-sm text-gray-400">
-                  Enter a domain name to inspect its SSL certificates and security status
+                  {isBatchMode 
+                    ? 'Enter multiple domains or upload a CSV file to check multiple certificates at once'
+                    : 'Enter a domain name to inspect its SSL certificates and security status'
+                  }
                 </p>
               </motion.div>
               
               <div className="bg-black/20 rounded-2xl border border-white/10 p-6 sm:p-8 backdrop-blur-xl shadow-inner">
-                <CertificateForm onSubmit={handleSubmit} loading={loading} />
+                {isBatchMode ? (
+                  <BatchCertificateForm onSubmit={handleBatchSubmit} loading={loading} />
+                ) : (
+                  <CertificateForm onSubmit={handleSingleSubmit} loading={loading} />
+                )}
               </div>
             </div>
           </motion.div>
 
           {/* Results Section */}
-          <AnimatePresence mode="wait">
-            {(certificates.length > 0 || error) && (
+          <AnimatePresence>
+            {((certificates.length > 0 || error) && !isBatchMode) && (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -195,6 +310,18 @@ const App = () => {
                     <CertificateChain certificates={certificates} domain={searchedDomain} />
                   </div>
                 )}
+              </motion.div>
+            )}
+
+            {batchResults.length > 0 && isBatchMode && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.5 }}
+                className="mt-8"
+              >
+                <BatchResults results={batchResults} />
               </motion.div>
             )}
           </AnimatePresence>

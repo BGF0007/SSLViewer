@@ -1,4 +1,4 @@
-import { X, Server, Shield, Code2, Terminal, Link, CheckCircle2 } from 'lucide-react';
+import { X, Server, Shield, Code2, Terminal, Link, CheckCircle2, Files } from 'lucide-react';
 import { motion } from 'framer-motion';
 interface AboutProps {
   onClose: () => void;
@@ -55,7 +55,7 @@ const About = ({ onClose }: AboutProps) => {
         onClick={e => e.stopPropagation()}
       >
         <div className="relative p-6 sm:p-8">
-          <div className="absolute inset-0 bg-gradient-to-tr from-blue-500/5 via-transparent to-emerald-500/5"></div>
+          <div className="absolute inset-0 bg-gradient-to-tr from-blue-500/5 via-transparent to-grey-500/5"></div>
           
           <div className="relative">
             <div className="flex items-center justify-between mb-6">
@@ -88,6 +88,7 @@ const About = ({ onClose }: AboutProps) => {
                 <p className="text-gray-300">
                   SSL Viewer is a powerful tool designed to help you inspect and validate SSL certificates for any domain.
                   Our tool provides detailed insights into certificate chains, validation status, and potential security issues.
+                  With our batch processing feature, you can efficiently analyze multiple domains simultaneously.
                 </p>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
@@ -95,7 +96,7 @@ const About = ({ onClose }: AboutProps) => {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.2 }}
-                    className="p-4 rounded-xl bg-white/[0.03] border border-white/10 backdrop-blur-sm"
+                    className="p-4 rounded-xl bg-white/[0.03] border border-white/10 backdrop-blur-sm hover:bg-white/[0.05] transition-colors"
                   >
                     <div className="flex items-center gap-3 mb-2">
                       <Shield className="w-5 h-5 text-emerald-400" />
@@ -110,7 +111,7 @@ const About = ({ onClose }: AboutProps) => {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.3 }}
-                    className="p-4 rounded-xl bg-white/[0.03] border border-white/10 backdrop-blur-sm"
+                    className="p-4 rounded-xl bg-white/[0.03] border border-white/10 backdrop-blur-sm hover:bg-white/[0.05] transition-colors"
                   >
                     <div className="flex items-center gap-3 mb-2">
                       <Link className="w-5 h-5 text-blue-400" />
@@ -118,6 +119,36 @@ const About = ({ onClose }: AboutProps) => {
                     </div>
                     <p className="text-sm text-gray-400">
                       Detailed analysis of the complete certificate chain from leaf to root certificates.
+                    </p>
+                  </motion.div>
+
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.4 }}
+                    className="p-4 rounded-xl bg-white/[0.03] border border-white/10 backdrop-blur-sm hover:bg-white/[0.05] transition-colors"
+                  >
+                    <div className="flex items-center gap-3 mb-2">
+                      <Files className="w-5 h-5 text-violet-400" />
+                      <h3 className="font-medium text-gray-200">Batch Processing</h3>
+                    </div>
+                    <p className="text-sm text-gray-400">
+                      Process multiple domains at once by uploading a CSV file or entering a list of domains.
+                    </p>
+                  </motion.div>
+
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.5 }}
+                    className="p-4 rounded-xl bg-white/[0.03] border border-white/10 backdrop-blur-sm hover:bg-white/[0.05] transition-colors"
+                  >
+                    <div className="flex items-center gap-3 mb-2">
+                      <Terminal className="w-5 h-5 text-yellow-400" />
+                      <h3 className="font-medium text-gray-200">Bulk Export</h3>
+                    </div>
+                    <p className="text-sm text-gray-400">
+                      Export batch processing results in various formats for further analysis and reporting.
                     </p>
                   </motion.div>
                 </div>
@@ -129,7 +160,8 @@ const About = ({ onClose }: AboutProps) => {
                       'Real-time certificate validation',
                       'Complete chain visualization',
                       'Security vulnerability checks',
-                      'Detailed certificate information',
+                      'Batch processing of multiple domains',
+                      'Export results in various formats',
                       'Modern and intuitive interface'
                     ].map((feature, index) => (
                       <motion.li
@@ -152,11 +184,11 @@ const About = ({ onClose }: AboutProps) => {
                   <div className="flex items-center gap-4">
                     <motion.div
                       whileHover={{ scale: 1.05 }}
-                      className="px-3 py-1 text-xs font-semibold bg-[#57A3FF]/10 text-[#57A3FF] rounded-full border border-[#57A3FF]/20"
+                      className="px-3 py-1 text-xs font-semibold bg-[#FF5757]/10 text-[#FF5757] rounded-full border border-[#FF5757]/20"
                     >
                       BETA
                     </motion.div>
-                    <span className="text-sm text-gray-500">Version 1.0.0</span>
+                    <span className="text-sm text-gray-500">Version 1.0.2</span>
                   </div>
                   <motion.button
                     whileHover={{ scale: 1.02 }}
