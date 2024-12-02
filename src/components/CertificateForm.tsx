@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Globe, AlertCircle, ArrowRight, CheckCircle2 } from 'lucide-react';
+import { Globe, AlertCircle, ArrowRight, HelpCircle } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import '../styles/transitions.css';
+import Tooltip from './Tooltip'; 
 
 interface CertificateFormProps {
   onSubmit: (hostname: string, port?: number) => void;
@@ -14,6 +15,7 @@ const CertificateForm: React.FC<CertificateFormProps> = ({ onSubmit, loading }) 
   const [touched, setTouched] = useState({ hostname: false, port: false });
   const [isTyping, setIsTyping] = useState(false);
   const [validState, setValidState] = useState({ hostname: false, port: true });
+  const [showTooltip, setShowTooltip] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -79,7 +81,7 @@ const CertificateForm: React.FC<CertificateFormProps> = ({ onSubmit, loading }) 
     : '';
 
   return (
-    <form onSubmit={handleSubmit} className="relative">
+    <form onSubmit={handleSubmit} className="relative" aria-label="SSL Certificate Checker">
       <div className="w-full space-y-6">
         <AnimatePresence>
           {(hostnameError || portError) && (
@@ -89,6 +91,7 @@ const CertificateForm: React.FC<CertificateFormProps> = ({ onSubmit, loading }) 
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.2 }}
               className="space-y-2"
+              role="alert"
             >
               {hostnameError && (
                 <div className="px-4 py-2.5 bg-rose-500/10 text-rose-400/90 text-sm rounded-xl flex items-center gap-2.5 border border-rose-500/10 backdrop-blur-sm">
@@ -117,34 +120,39 @@ const CertificateForm: React.FC<CertificateFormProps> = ({ onSubmit, loading }) 
                 onBlur={() => setTouched({ ...touched, hostname: true })}
                 onKeyDown={handleKeyDown}
                 placeholder="Enter domain name (e.g., example.com)"
+                aria-invalid={touched.hostname && !validState.hostname}
+                aria-describedby="hostname-help"
                 className={`w-full pl-12 pr-4 py-4 bg-white/[0.02] border ${
                   touched.hostname && !validState.hostname
                     ? 'border-rose-500/50 focus:border-rose-500'
                     : touched.hostname && validState.hostname
-                    ? 'border-emerald-500/50 focus:border-emerald-500'
+                    ? 'border-emerald-500 focus:border-emerald-500'
                     : 'border-white/10 focus:border-white/20'
                 } rounded-xl outline-none transition-all duration-200 placeholder-gray-500 text-gray-200 backdrop-blur-sm
                 focus:ring-2 ${
                   touched.hostname && !validState.hostname
                     ? 'focus:ring-rose-500/10'
                     : touched.hostname && validState.hostname
-                    ? 'focus:ring-emerald-500/10'
+                    ? 'focus:ring-emerald-500'
                     : 'focus:ring-white/5'
                 } shadow-lg shadow-black/10`}
               />
-              {touched.hostname && validState.hostname && (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="absolute right-4 top-1/2 transform -translate-y-1/2"
-                >
-                  <CheckCircle2 className="w-5 h-5 text-emerald-500" />
-                </motion.div>
-              )}
+              <div 
+                className="absolute right-4 top-1/2 transform -translate-y-1/2"
+                onMouseEnter={() => setShowTooltip(true)}
+                onMouseLeave={() => setShowTooltip(false)}
+              >
+                <HelpCircle className="w-5 h-5 text-gray-400 hover:text-gray-300 cursor-help" />
+                {showTooltip && (
+                  <Tooltip>
+                    Enter a fully qualified domain name (FQDN) like example.com
+                  </Tooltip>
+                )}
+              </div>
             </div>
             <div className="mt-2 flex items-center gap-3">
               <div className="h-px flex-1 bg-gradient-to-r from-white/[0.01] via-white/5 to-white/[0.01]" />
-              <span className="text-xs text-gray-500">SSL Certificate Inspection</span>
+              <span className="text-xs text-gray-400">SSL Certificate Inspection</span>
               <div className="h-px flex-1 bg-gradient-to-r from-white/[0.01] via-white/5 to-white/[0.01]" />
             </div>
           </div>
@@ -157,18 +165,20 @@ const CertificateForm: React.FC<CertificateFormProps> = ({ onSubmit, loading }) 
               onBlur={() => setTouched({ ...touched, port: true })}
               onKeyDown={handleKeyDown}
               placeholder="Port (default: 443)"
+              aria-invalid={touched.port && !validState.port}
+              aria-describedby="port-help"
               className={`w-full px-4 py-4 bg-white/[0.02] border ${
                 touched.port && !validState.port
                   ? 'border-rose-500/50 focus:border-rose-500'
                   : touched.port && validState.port && port
-                  ? 'border-emerald-500/50 focus:border-emerald-500'
+                  ? 'border-emerald-500 focus:border-emerald-500'
                   : 'border-white/10 focus:border-white/20'
               } rounded-xl outline-none transition-all duration-200 placeholder-gray-500 text-gray-200 backdrop-blur-sm
               focus:ring-2 ${
                 touched.port && !validState.port
                   ? 'focus:ring-rose-500/10'
                   : touched.port && validState.port && port
-                  ? 'focus:ring-emerald-500/10'
+                  ? 'focus:ring-emerald-500'
                   : 'focus:ring-white/5'
               } shadow-lg shadow-black/10`}
             />
@@ -180,6 +190,7 @@ const CertificateForm: React.FC<CertificateFormProps> = ({ onSubmit, loading }) 
           whileTap={{ scale: 0.99 }}
           type="submit"
           disabled={loading || !hostname || !validState.hostname || !validState.port}
+          aria-busy={loading}
           className={`group w-full mt-6 px-8 py-4 flex items-center justify-center gap-3 rounded-xl font-medium transition-all duration-200 ${
             loading || !hostname || !validState.hostname || !validState.port
               ? 'bg-white/[0.02] text-gray-500 cursor-not-allowed border border-white/5'
@@ -187,7 +198,11 @@ const CertificateForm: React.FC<CertificateFormProps> = ({ onSubmit, loading }) 
           }`}
         >
           {loading ? (
-            <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+            <div 
+              className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" 
+              role="status"
+              aria-label="Loading"
+            />
           ) : (
             <>
               <span>Check Certificate</span>
@@ -203,13 +218,6 @@ const CertificateForm: React.FC<CertificateFormProps> = ({ onSubmit, loading }) 
           >
             <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-lg shadow-emerald-500/20"></div>
             <span className="text-xs text-gray-400">Certificate Validation</span>
-          </motion.div>
-          <motion.div 
-            whileHover={{ scale: 1.05 }}
-            className="flex items-center gap-2 bg-white/[0.02] px-3 py-2 rounded-full border border-white/5 shadow-lg shadow-black/10"
-          >
-            <div className="w-2 h-2 rounded-full bg-blue-500 shadow-lg shadow-blue-500/20"></div>
-            <span className="text-xs text-gray-400">Chain Verification</span>
           </motion.div>
         </div>
       </div>
